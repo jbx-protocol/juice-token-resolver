@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import {IJBTokenUriResolver} from "@juicebox/interfaces/IJBTokenUriResolver.sol";
-import {IJBProjects} from "@juicebox/interfaces/IJBProjects.sol";
+import {IJBTokenUriResolver} from "@jbx-protocol/interfaces/IJBTokenUriResolver.sol";
+import {IJBProjects} from "@jbx-protocol/interfaces/IJBProjects.sol";
 import {Ownable} from "openzeppelin-contracts/contracts/access/Ownable.sol";
 import {JBUriOperations} from "./Libraries/JBUriOperations.sol";
-import {JBOperatable, IJBOperatorStore} from "@juicebox/abstract/JBOperatable.sol";
+import {JBOperatable, IJBOperatorStore} from "@jbx-protocol/abstract/JBOperatable.sol";
 
 /**
  * @title Juicebox TokenUriResolver Registry

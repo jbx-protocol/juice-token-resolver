@@ -1,23 +1,23 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import {IJBTokenUriResolver} from "@juicebox/interfaces/IJBTokenUriResolver.sol";
-import {IJBToken, IJBTokenStore} from "@juicebox/interfaces/IJBTokenStore.sol";
-import {JBFundingCycle} from "@juicebox/structs/JBFundingCycle.sol";
-import {IJBPaymentTerminal} from "@juicebox/interfaces/IJBPaymentTerminal.sol";
-import {JBTokens} from "@juicebox/libraries/JBTokens.sol";
-import {JBCurrencies} from "@juicebox/libraries/JBCurrencies.sol";
-import {IJBController, IJBDirectory, IJBFundingCycleStore} from "@juicebox/interfaces/IJBController.sol";
-import {IJBOperatorStore} from "@juicebox/interfaces/IJBOperatorStore.sol";
-import {IJBPayoutRedemptionPaymentTerminal} from "@juicebox/interfaces/IJBPayoutRedemptionPaymentTerminal.sol";
-import {IJBSingleTokenPaymentTerminalStore, IJBSingleTokenPaymentTerminal} from "@juicebox/interfaces/IJBSingleTokenPaymentTerminalStore.sol";
-import {JBPayoutRedemptionPaymentTerminal} from "@juicebox/abstract/JBPayoutRedemptionPaymentTerminal.sol";
-import {IJBProjects} from "@juicebox/interfaces/IJBProjects.sol";
+import {IJBTokenUriResolver} from "@jbx-protocol/juice-contracts-v3/interfaces/IJBTokenUriResolver.sol";
+import {IJBToken, IJBTokenStore} from "@jbx-protocol/juice-contracts-v3/interfaces/IJBTokenStore.sol";
+import {JBFundingCycle} from "@jbx-protocol/juice-contracts-v3/structs/JBFundingCycle.sol";
+import {IJBPaymentTerminal} from "@jbx-protocol/juice-contracts-v3/interfaces/IJBPaymentTerminal.sol";
+import {JBTokens} from "@jbx-protocol/juice-contracts-v3/libraries/JBTokens.sol";
+import {JBCurrencies} from "@jbx-protocol/juice-contracts-v3/libraries/JBCurrencies.sol";
+import {IJBController, IJBDirectory, IJBFundingCycleStore} from "@jbx-protocol/juice-contracts-v3/interfaces/IJBController.sol";
+import {IJBOperatorStore} from "@jbx-protocol/juice-contracts-v3/interfaces/IJBOperatorStore.sol";
+import {IJBPayoutRedemptionPaymentTerminal} from "@jbx-protocol/juice-contracts-v3/interfaces/IJBPayoutRedemptionPaymentTerminal.sol";
+import {IJBSingleTokenPaymentTerminalStore, IJBSingleTokenPaymentTerminal} from "@jbx-protocol/juice-contracts-v3/interfaces/IJBSingleTokenPaymentTerminalStore.sol";
+import {JBPayoutRedemptionPaymentTerminal} from "@jbx-protocol/juice-contracts-v3/abstract/JBPayoutRedemptionPaymentTerminal.sol";
+import {IJBProjects} from "@jbx-protocol/juice-contracts-v3/interfaces/IJBProjects.sol";
 import {IJBProjectHandles} from "juice-project-handles/interfaces/IJBProjectHandles.sol";
-import {JBOperatable} from "@juicebox/abstract/JBOperatable.sol";
+import {JBOperatable} from "@jbx-protocol/juice-contracts-v3/abstract/JBOperatable.sol";
 import {JBUriOperations} from "./Libraries/JBUriOperations.sol";
 import {Theme} from "./Structs/Theme.sol";
-import "base64/base64.sol";
+import "@base64/base64.sol";
 import {Strings} from "openzeppelin-contracts/contracts/utils/Strings.sol";
 import "./ITypeface.sol";
 
