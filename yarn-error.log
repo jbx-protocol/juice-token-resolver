@@ -1,5 +1,5 @@
 Arguments: 
-  /Users/nico/.nvm/versions/node/v18.7.0/bin/node /Users/nico/.nvm/versions/node/v18.7.0/bin/yarn add jbx-protocol
+  /Users/nico/.nvm/versions/node/v18.7.0/bin/node /Users/nico/.nvm/versions/node/v18.7.0/bin/yarn add @jbx-protocol/juice-project-handles
 
 PATH: 
   /Users/nico/.yarn/bin:/Users/nico/.nvm/versions/node/v18.7.0/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/go/bin:/usr/local/share/dotnet:/Users/nico/.yarn/bin:/Users/nico/.nvm/versions/node/v18.7.0/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/Users/nico/.cargo/bin:/Users/nico/.foundry/bin:/Users/nico/.foundry/bin
@@ -14,7 +14,7 @@ Platform:
   darwin arm64
 
 Trace: 
-  Error: https://registry.yarnpkg.com/jbx-protocol: Not found
+  Error: https://registry.yarnpkg.com/@jbx-protocol%2fjuice-project-handles: Not found
       at params.callback [as _callback] (/Users/nico/.nvm/versions/node/v18.7.0/lib/node_modules/yarn/lib/cli.js:66145:18)
       at self.callback (/Users/nico/.nvm/versions/node/v18.7.0/lib/node_modules/yarn/lib/cli.js:140890:22)
       at Request.emit (node:events:513:28)
@@ -29,7 +29,7 @@ Trace:
 npm manifest: 
   {
     "dependencies": {
-      "@jbx-protocol/juice-contracts-v3": "^2.0.3",
+      "@jbx-protocol/juice-contracts-v3": "^2.0.5",
       "@openzeppelin/contracts": "^4.8.1",
       "@paulrberg/contracts": "^3.7.0",
       "base64-sol": "^1.1.0"
@@ -72,10 +72,10 @@ Lockfile:
     resolved "https://registry.yarnpkg.com/@ethersproject/logger/-/logger-5.7.0.tgz#6ce9ae168e74fecf287be17062b590852c311892"
     integrity sha512-0odtFdXu/XHtjQXJYA3u9G0G8btm0ND5Cu8M7i5vhEcE8/HmF4Lbdqanwyv4uQTr2tx6b7fQRmgLrsnpQlmnig==
   
-  "@jbx-protocol/juice-contracts-v3@^2.0.3":
-    version "2.0.3"
-    resolved "https://registry.yarnpkg.com/@jbx-protocol/juice-contracts-v3/-/juice-contracts-v3-2.0.3.tgz#0b0acd14a6ad51da4e425b8d55bad8db5c7dbbc1"
-    integrity sha512-lYXRYlhUzsR9xLrzXTq95Ps3rE6xNDrgKhZ+yiitdPRRkAPPA887BtSt72BamsKUiHl3xAoKGYIvv+3b/h9/UA==
+  "@jbx-protocol/juice-contracts-v3@^2.0.5":
+    version "2.0.5"
+    resolved "https://registry.yarnpkg.com/@jbx-protocol/juice-contracts-v3/-/juice-contracts-v3-2.0.5.tgz#b75e5547d3ffe660a3fb9124e5e747fc52b5d642"
+    integrity sha512-pQSJbzz96nzHc2HDlN0Xx6uJufnRPAiUsilSwGRLjX38KZaeOtC7LU+YY0G5OHpH8tQPyAC/G/m5EwjpObIh3A==
   
   "@openzeppelin/contracts@^4.8.1":
     version "4.8.1"

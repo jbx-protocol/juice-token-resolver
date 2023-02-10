@@ -13,12 +13,12 @@ import {IJBPayoutRedemptionPaymentTerminal} from "@jbx-protocol/juice-contracts-
 import {IJBSingleTokenPaymentTerminalStore, IJBSingleTokenPaymentTerminal} from "@jbx-protocol/juice-contracts-v3/contracts/interfaces/IJBSingleTokenPaymentTerminalStore.sol";
 import {JBPayoutRedemptionPaymentTerminal} from "@jbx-protocol/juice-contracts-v3/contracts/abstract/JBPayoutRedemptionPaymentTerminal.sol";
 import {IJBProjects} from "@jbx-protocol/juice-contracts-v3/contracts/interfaces/IJBProjects.sol";
-import {IJBProjectHandles} from "juice-project-handles/interfaces/IJBProjectHandles.sol";
+import {IJBProjectHandles} from "@jbx-protocol/project-handles/contracts/interfaces/IJBProjectHandles.sol"; // Needs updating when NPM is renamed to /juice-project-handles
 import {JBOperatable} from "@jbx-protocol/juice-contracts-v3/contracts/abstract/JBOperatable.sol";
 import {JBUriOperations} from "./Libraries/JBUriOperations.sol";
 import {Theme} from "./Structs/Theme.sol";
-import "@base64/base64.sol";
-import {Strings} from "openzeppelin-contracts/contracts/utils/Strings.sol";
+import "base64-sol/base64.sol";
+import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import "./ITypeface.sol";
 
 // // ENS RESOLUTION
