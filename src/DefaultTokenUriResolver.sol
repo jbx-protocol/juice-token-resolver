@@ -17,9 +17,9 @@ import {IJBProjectHandles} from "@jbx-protocol/project-handles/contracts/interfa
 import {JBOperatable} from "@jbx-protocol/juice-contracts-v3/contracts/abstract/JBOperatable.sol";
 import {JBUriOperations} from "./Libraries/JBUriOperations.sol";
 import {Theme} from "./Structs/Theme.sol";
-import "base64-sol/base64.sol";
+import {Base64} from "base64-sol/base64.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
-import "./ITypeface.sol";
+import {Font, ITypeface} from "typeface/interfaces/ITypeface.sol";
 
 // // ENS RESOLUTION
 interface IReverseRegistrar {
@@ -67,15 +67,25 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
         IJBDirectory _directory,
         IJBProjectHandles _projectHandles,
         ITypeface _capsulesTypeface
+    )
         // IReverseRegistrar _reverseRegistrar,
         // IResolver _resolver
-    ) JBOperatable(_operatorStore) {
+        JBOperatable(_operatorStore)
+    {
         directory = _directory;
         projects = directory.projects();
         fundingCycleStore = directory.fundingCycleStore();
         controller = IJBController(directory.controllerOf(1));
         tokenStore = controller.tokenStore();
-        singleTokenPaymentTerminalStore = IJBSingleTokenPaymentTerminalStore(IJBPayoutRedemptionPaymentTerminal(address(IJBPaymentTerminal(directory.primaryTerminalOf(1, JBTokens.ETH)))).store());
+        singleTokenPaymentTerminalStore = IJBSingleTokenPaymentTerminalStore(
+            IJBPayoutRedemptionPaymentTerminal(
+                address(
+                    IJBPaymentTerminal(
+                        directory.primaryTerminalOf(1, JBTokens.ETH)
+                    )
+                )
+            ).store()
+        );
         projectHandles = _projectHandles;
         capsulesTypeface = _capsulesTypeface;
         // reverseRegistrar = _reverseRegistrar;
