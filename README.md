@@ -15,6 +15,8 @@ Note: Update `foundry.toml`'s `solc` reference as needed.
 `forge create --rpc-url $GOERLI_RPC_URL --constructor-args-path constructor-args/DefaultTokenUriResolver/goerli_constructor_args --private-key $GOERLI_PRIV_KEY --etherscan-api-key $ETHERSCAN_API_KEY --via-ir --verify src/DefaultTokenUriResolver.sol:DefaultTokenUriResolver`
 
 #### TokenUriResolver (untested)
+Update the third address in `/constructor-args/tokenUriResolver/goerli_constructor_args` to the DefaultTokenUriResolver deployed in the previous step.
+
 `forge create --rpc-url $GOERLI_RPC_URL --constructor-args-path constructor-args/TokenUriResolver/goerli_constructor_args --private-key $GOERLI_PRIV_KEY --etherscan-api-key $ETHERSCAN_API_KEY --via-ir --verify src/TokenUriResolver.sol:TokenUriResolver`
 
 ## Demo
