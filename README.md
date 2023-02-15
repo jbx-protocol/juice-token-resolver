@@ -4,7 +4,7 @@ Creates onchain SVG Metadata for all v2 Juicebox projects.
 
 ## Getting started
 
-This repo relies on Mainnet forking for testing. This approach allows tests to surface real chain data, and avoids redeploying the entire Juicebox Protocol and Project Handles before running its own test. The tradeoff is that you need access to an RPC to test the repo. 
+This repo relies on Mainnet forking for its tests. This approach allows tests to surface real chain data, and avoids the need to redeploy the entire Juicebox protocol, Juicebox Project Handles, and ENS protocol, as well as instantiating projects, .eth addresses, and handles, before running its own test. The tradeoff is that you need access to an RPC to test the repo.
 
 ⚠️ Security note ⚠️ This repo's tests use forge's `ffi` to save SVG images to disk and open them in Brave. This rendering approach means that malicious updates to this repo, or forks thereof, could allow Node to execute code on your system with filesystem access, and open files in your browser or other applications. Please be careful when running tests, that no malicious changes have been introduced to the code. This code is provided as-is with no guarantee or warranty. 
 
