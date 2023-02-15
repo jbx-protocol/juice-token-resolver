@@ -25,6 +25,8 @@ If you append `--fork-block-number BLOCK_NUMBER` to the above, replacing `BLOCK_
 
 ### Test *only* the default SVG output
 
+This test generates the default SVG to `src/onchain.svg`.
+
 Run `forge test --fork-url $ETH_RPC_URL -v --via-ir --ffi --match-test Get`
 
 ## Deploying
