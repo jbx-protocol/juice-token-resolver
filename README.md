@@ -42,9 +42,9 @@ Update the third address in `/constructor-args/tokenUriResolver/goerli_construct
 
 `forge create --rpc-url $GOERLI_RPC_URL --constructor-args-path constructor-args/TokenUriResolver/goerli_constructor_args --private-key $GOERLI_PRIV_KEY --etherscan-api-key $ETHERSCAN_API_KEY --via-ir --verify src/TokenUriResolver.sol:TokenUriResolver`
 
-## Demo
+## Example output
 
-![](src/onchain.png)
+![](src/onchain.svg)
 
 ## Additional resources 
 - Useful byte length checker https://mothereff.in/byte-counter
