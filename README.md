@@ -6,16 +6,18 @@ Creates onchain SVG Metadata for all v2 Juicebox projects.
 
 This repo relies on Mainnet forking for its tests. This approach allows tests to surface real chain data, and avoids the need to redeploy the entire Juicebox protocol, Juicebox Project Handles, and ENS protocol, as well as instantiating projects, .eth addresses, and handles, before running its own test. The tradeoff is that you need access to an RPC to test the repo.
 
-⚠️ Security note ⚠️ This repo's tests use forge's `ffi` to save SVG images to disk and open them in Brave. This rendering approach means that malicious updates to this repo, or forks thereof, could allow Node to execute code on your system with filesystem access, and open files in your browser or other applications. Please be careful when running tests, that no malicious changes have been introduced to the code. This code is provided as-is with no guarantee or warranty. 
+⚠️ Security note ⚠️ This repo's tests use forge's `ffi` to save SVG images to disk and open them in your default SVG reader (usually the browser). This rendering approach means that malicious updates to this repo, or forks thereof, could allow Node to execute code on your system with filesystem access, and open files in your browser or other applications. Please be careful to check that no malicious changes have been introduced to the code before running tests. This code is provided as-is with no guarantee or warranty. 
+
+### Installation
 
 1. `git clone` this repo.
 2. Install [Foundry](https://book.getfoundry.sh/getting-started/installation.html), or update Foundry with `foundryup`.
 3. `cd` into the directory and call `forge install && yarn install` to install dependencies.
 4. You will need an ETH RPC API key to fork mainnet in tests. You can acquire a free API key from Infura, Alchemy, and other providers listed on https://ethereumnodes.com/.
 
-## Running tests
+## Testing
 
-### Run all tests: 
+### Run all tests
 
 Run `forge test --fork-url $ETH_RPC_URL -v --via-ir --ffi`, replacing `$ETH_RPC_URL` with your own RPC provider and API key. An RPC url might look like `https://mainnet.infura.io/v3/xyzabc123xyzabc123xyzabc123`.
 
