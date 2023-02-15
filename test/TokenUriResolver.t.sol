@@ -270,7 +270,7 @@ contract ContractTest is Test {
         Theme memory customTheme = Theme({
             projectId: 1,
             textColor: "white",
-            bgColor: "black",
+            bgColor: "grey",
             bgColorDark: "black"
         });
         vm.prank(0xAF28bcB48C40dBC86f52D459A6562F658fc94B1e);
