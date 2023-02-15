@@ -50,7 +50,8 @@ Update the third address in `/constructor-args/tokenUriResolver/goerli_construct
 - Useful byte length checker https://mothereff.in/byte-counter
 
 ## Credits
+This project would not have been possible without the following contributions. Thank you! 
 - [Capsules](https://cpsls.app/) is an onchain typeface by [Peripheralist](https://github.com/peripheralist/typeface).
 - The `ffi` script and `open.js` was developed by [Jeton Connu](https://github.com/jeton-connu).
-- Thanks to [Dr.Gorilla](https://github.com/drgorillamd) for devops support during the development of this project.
-- Thanks to [Jango](https://github.com/mejango) and the Juicebox Contract Crew for creating the Juicebox protocol.
+- [Dr.Gorilla](https://github.com/drgorillamd) provided devops support during the development of this project.
+- [Jango](https://github.com/mejango) and the Juicebox Contract Crew created the Juicebox protocol.
