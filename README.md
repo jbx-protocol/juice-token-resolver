@@ -53,4 +53,4 @@ Update the third address in `/constructor-args/tokenUriResolver/goerli_construct
 - [Capsules](https://cpsls.app/) is an onchain typeface by [Peripheralist](https://github.com/peripheralist/typeface).
 - The `ffi` script and `open.js` was developed by [Jeton Connu](https://github.com/jeton-connu).
 - Thanks to [Dr.Gorilla](https://github.com/drgorillamd) for devops support during the development of this project.
-- Thanks to [Jango](https://github.com/mejango) for creating the Juicebox protocol.
+- Thanks to [Jango](https://github.com/mejango) and the Juicebox Contract Crew for creating the Juicebox protocol.
