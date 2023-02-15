@@ -509,27 +509,27 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
         // The first half of each line (15 chars) is the title
         // The second half of each line (15 chars) is the value
         // The first and last characters on the line are two spaces
-        // The first line (header) is an exception.
+        // The first line (head) is an exception.
         parts[2] = Base64.encode(
             abi.encodePacked(
                 '<svg width="289" height="403" viewBox="0 0 289 403" xmlns="http://www.w3.org/2000/svg"><style>@font-face{font-family:"Capsules-500";src:url(data:font/truetype;charset=utf-8;base64,',
                 getFontSource(), // import Capsules typeface
                 ');format("opentype");}a,a:visited,a:hover{fill:inherit;text-decoration:none;}text{font-size:16px;fill:',
                 theme.textColor,
-                ';font-family:"Capsules-500",monospace;font-weight:500;white-space:pre-wrap;}#header text{fill:',
+                ';font-family:"Capsules-500",monospace;font-weight:500;white-space:pre;}#head text{fill:',
                 theme.bgColor,
-                ';}</style><g clip-path="url(#clip0_150_56)"><path d="M289 0H0V403H289V0Z" fill="url(#paint0_linear_150_56)"/><rect width="289" height="22" fill="',
+                ';}</style><g clip-path="url(#clip0)"><path d="M289 0H0V403H289V0Z" fill="url(#paint0)"/><rect width="289" height="22" fill="',
                 theme.textColor,
-                '"/><g id="header"><a href="https://juicebox.money/v2/p/',
+                '"/><g id="head"><a href="https://juicebox.money/v2/p/',
                 _projectId.toString(),
-                '">', // Line 0: Header
+                '">', // Line 0: Head
                 '<text x="16" y="16">',
                 projectName,
                 '</text></a><a href="https://juicebox.money"><text x="259.25" y="16">',
                 unicode"",
                 "</text></a></g>",
                 // Line 1: FC + Time left
-                '<g filter="url(#filter1_d_150_56)"><text x="0" y="48">',
+                '<g filter="url(#filter1)"><text x="0" y="48">',
                 getFCTimeLeftRow(fundingCycle),
                 "</text>",
                 // Line 2: Spacer
@@ -561,7 +561,7 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
                 '">',
                 ownerName,
                 "</a>",
-                '</text></g></g><defs><filter id="filter0_d_150_56" x="15.8275" y="0.039999" width="256.164" height="21.12" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/><feOffset/><feGaussianBlur stdDeviation="2"/><feComposite in2="hardAlpha" operator="out"/><feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 0.572549 0 0 0 0 0.0745098 0 0 0 0.68 0"/><feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_150_56"/><feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_150_56" result="shape"/></filter><filter id="filter1_d_150_56" x="-3.36" y="26.04" width="294.539" height="126.12" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/><feOffset/><feGaussianBlur stdDeviation="2"/><feComposite in2="hardAlpha" operator="out"/> <feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 0.572549 0 0 0 0 0.0745098 0 0 0 0.68 0"/><feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_150_56"/><feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_150_56" result="shape"/></filter><linearGradient id="paint0_linear_150_56" x1="0" y1="202" x2="289" y2="202" gradientUnits="userSpaceOnUse"><stop stop-color="',
+                '</text></g></g><defs><filter id="filter1" x="-3.36" y="26.04" width="294.539" height="126.12" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/><feOffset/><feGaussianBlur stdDeviation="2"/><feComposite in2="hardAlpha" operator="out"/> <feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 0.572549 0 0 0 0 0.0745098 0 0 0 0.68 0"/><feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_150_56"/><feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_150_56" result="shape"/></filter><linearGradient id="paint0" x1="0" y1="202" x2="289" y2="202" gradientUnits="userSpaceOnUse"><stop stop-color="',
                 theme.bgColorDark,
                 '"/><stop offset="0.119792" stop-color="',
                 theme.bgColor,
@@ -569,7 +569,7 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
                 theme.bgColor,
                 '"/><stop offset="1" stop-color="',
                 theme.bgColorDark,
-                '"/></linearGradient><clipPath id="clip0_150_56"><rect width="289" height="403" /></clipPath></defs></svg>'
+                '"/></linearGradient><clipPath id="clip0"><rect width="289" height="403" /></clipPath></defs></svg>'
             )
         );
         parts[3] = string('"}');
