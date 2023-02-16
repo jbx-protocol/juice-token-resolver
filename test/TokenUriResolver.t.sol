@@ -58,6 +58,7 @@ contract ContractTest is Test {
     // Tests that the default resolver works correctly
     function testGetDefaultMetadata() external {
         string memory x = t.getUri(1);
+        assertTrue(keccak256(abi.encodePacked(x)) != keccak256(abi.encodePacked(string(""))));
         string[] memory inputs = new string[](3);
         inputs[0] = "node";
         inputs[1] = "./open.js";
