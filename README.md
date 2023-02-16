@@ -51,6 +51,7 @@ Update the third address in `/constructor-args/tokenUriResolver/goerli_construct
 
 ## Credits
 This project would not have been possible without the following contributions. Thank you! 
+
 - [Capsules](https://cpsls.app/) is an onchain typeface by [Peripheralist](https://github.com/peripheralist/typeface).
 - The `ffi` script and `open.js` was developed by [Jeton Connu](https://github.com/jeton-connu).
 - [Dr.Gorilla](https://github.com/drgorillamd) provided devops support during the development of this project.

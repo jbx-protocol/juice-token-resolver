@@ -67,9 +67,9 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
         IJBDirectory _directory,
         IJBProjectHandles _projectHandles,
         ITypeface _capsulesTypeface
+        // , IReverseRegistrar _reverseRegistrar
+        // , IResolver _resolver
     )
-        // IReverseRegistrar _reverseRegistrar,
-        // IResolver _resolver
         JBOperatable(_operatorStore)
     {
         directory = _directory;
