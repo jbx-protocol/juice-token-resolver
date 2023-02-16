@@ -34,10 +34,10 @@ contract ContractTest is Test {
         IJBProjectHandles(0xE3c01E9Fd2a1dCC6edF0b1058B5757138EF9FfB6);
     ITypeface public _capsulesTypeface =
         ITypeface(0xA77b7D93E79f1E6B4f77FaB29d9ef85733A3D44A);
-    IReverseRegistrar public _reverseRegistrar =
-        IReverseRegistrar(0x084b1c3C81545d370f3634392De611CaaBFf8148);
-    IResolver public _resolver =
-        IResolver(0xA2C122BE93b0074270ebeE7f6b7292C7deB45047);
+    // IReverseRegistrar public _reverseRegistrar =
+    //     IReverseRegistrar(0x084b1c3C81545d370f3634392De611CaaBFf8148);
+    // IResolver public _resolver =
+    //     IResolver(0xA2C122BE93b0074270ebeE7f6b7292C7deB45047);
 
     DefaultTokenUriResolver d =
         new DefaultTokenUriResolver(
