@@ -21,14 +21,14 @@ import {Base64} from "base64-sol/base64.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {Font, ITypeface} from "typeface/interfaces/ITypeface.sol";
 
-// // ENS RESOLUTION
-interface IReverseRegistrar {
-    function node(address) external view returns (bytes32);
-}
+// // ENS RESOLUTION (currently unused)
+// interface IReverseRegistrar {
+//     function node(address) external view returns (bytes32);
+// }
 
-interface IResolver {
-    function name(bytes32) external view returns (string memory);
-}
+// interface IResolver {
+//     function name(bytes32) external view returns (string memory);
+// }
 
 contract StringSlicer {
     // This function is in a separate contract so that TokenUriResolver can pass it a string memory and we can still use Array Slices (which only work on calldata)
