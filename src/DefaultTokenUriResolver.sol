@@ -21,15 +21,6 @@ import {Base64} from "base64-sol/base64.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {Font, ITypeface} from "typeface/interfaces/ITypeface.sol";
 
-// // ENS RESOLUTION (currently unused)
-// interface IReverseRegistrar {
-//     function node(address) external view returns (bytes32);
-// }
-
-// interface IResolver {
-//     function name(bytes32) external view returns (string memory);
-// }
-
 contract StringSlicer {
     // This function is in a separate contract so that TokenUriResolver can pass it a string memory and we can still use Array Slices (which only work on calldata)
     function slice(
@@ -57,9 +48,6 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
     IJBController public immutable controller;
     IJBProjectHandles public immutable projectHandles;
     ITypeface public immutable capsulesTypeface; // Capsules typeface
-    // IReverseRegistrar public reverseRegistrar; // ENS
-    // IResolver public resolver; // ENS
-
     mapping(uint256 => Theme) public themes;
 
     constructor(
@@ -67,8 +55,6 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
         IJBDirectory _directory,
         IJBProjectHandles _projectHandles,
         ITypeface _capsulesTypeface
-        // , IReverseRegistrar _reverseRegistrar
-        // , IResolver _resolver
     )
         JBOperatable(_operatorStore)
     {
@@ -88,8 +74,6 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
         );
         projectHandles = _projectHandles;
         capsulesTypeface = _capsulesTypeface;
-        // reverseRegistrar = _reverseRegistrar;
-        // resolver = _resolver;
         themes[0] = Theme({
             projectId: 0,
             textColor: "#FF9213",
@@ -404,14 +388,6 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
         );
         return string.concat(paddedTotalSupplyRight, paddedTotalSupplyLeft);
     }
-
-    // function setTokenUriResolverForProject(uint256 _projectId, IJBTokenUriResolver _resolver) external requirePermission(projects.ownerOf(_projectId), _projectId, JBUriOperations.SET_TOKEN_URI) {
-    //     if(_resolver == IJBTokenUriResolver(address(0))){
-    //         delete tokenUriResolvers[_projectId];
-    //     } else {
-    //         tokenUriResolvers[_projectId]= _resolver;
-    //     }
-    // }
 
     // TODO write tests
     function setTheme(Theme memory _theme)
