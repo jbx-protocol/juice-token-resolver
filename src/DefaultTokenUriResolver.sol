@@ -53,10 +53,10 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
     IJBProjects public projects;
     IJBDirectory public directory;
     IJBTokenStore public tokenStore;
-    IJBSingleTokenPaymentTerminalStore public singleTokenPaymentTerminalStore;
-    IJBController public controller;
-    IJBProjectHandles public projectHandles;
-    ITypeface public capsulesTypeface; // Capsules typeface
+    IJBSingleTokenPaymentTerminalStore public immutable singleTokenPaymentTerminalStore;
+    IJBController public immutable controller;
+    IJBProjectHandles public immutable projectHandles;
+    ITypeface public immutable capsulesTypeface; // Capsules typeface
     // IReverseRegistrar public reverseRegistrar; // ENS
     // IResolver public resolver; // ENS
 
