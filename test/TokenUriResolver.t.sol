@@ -74,9 +74,9 @@ contract ContractTest is Test {
         // Set a theme on the original resolver
         Theme memory customTheme = Theme({
             projectId: 1,
-            textColor: "white",
-            bgColor: "black",
-            bgColorDark: "black"
+            textColor: "fff",
+            bgColor: "000",
+            bgColorDark: "000"
         });
         vm.prank(0xAF28bcB48C40dBC86f52D459A6562F658fc94B1e);
         d.setTheme(customTheme);
@@ -270,9 +270,9 @@ contract ContractTest is Test {
     function testSetTheme() external {
         Theme memory customTheme = Theme({
             projectId: 1,
-            textColor: "white",
-            bgColor: "grey",
-            bgColorDark: "black"
+            textColor: "fff",
+            bgColor: "faa",
+            bgColorDark: "000"
         });
         vm.prank(0xAF28bcB48C40dBC86f52D459A6562F658fc94B1e);
         d.setTheme(customTheme);
