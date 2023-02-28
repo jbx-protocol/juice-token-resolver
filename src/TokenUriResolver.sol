@@ -61,11 +61,11 @@ contract TokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
         override
         returns (string memory tokenUri)
     {
-        address tur = address(tokenUriResolvers[_projectId]);
-        if (tur == address(0)) {
+        address _resolver = address(tokenUriResolvers[_projectId]);
+        if (_resolver == address(0)) {
             return tokenUriResolvers[0].getUri(_projectId);
         } else {
-            (bool success, bytes memory data) = tur.call{
+            (bool success, bytes memory data) = _resolver.call{
                 gas: DEFAULT_RESOLVER_GAS_USAGE
             }(abi.encodeWithSignature("getUri(uint256)", _projectId));
             if (success) {
