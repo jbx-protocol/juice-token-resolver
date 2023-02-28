@@ -14,11 +14,27 @@ import {JBOperatable, IJBOperatorStore} from "@jbx-protocol/juice-contracts-v3/c
  * @dev Juicebox project owners can override the default metadata for their project with their own IJBTokenUriResolver contracts.
  */
 contract TokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
+    
+    /**
+     * @notice The address of the Juicebox Projects contract.
+     */
     IJBProjects public immutable projects;
+
+    /**
+     * @notice The maximum amount of gas used by a resolver, to allow falling back on the default resolver.
+     */
     uint256 DEFAULT_RESOLVER_GAS_USAGE = 50_000_000;
+
+    /**
+     * @notice Emitted when the default IJBTokenUriResolver is set.
+     */
     event DefaultTokenUriResolverSet(
         IJBTokenUriResolver indexed tokenUriResolver
     );
+    
+    /**
+     * @notice Emitted when the Token Uri Resolver for a project is set.
+     */
     event ProjectTokenUriResolverSet(
         uint256 indexed projectId,
         IJBTokenUriResolver indexed tokenUriResolver
@@ -88,6 +104,7 @@ contract TokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
         )
     {
         tokenUriResolvers[_projectId] = _resolver;
+
         emit ProjectTokenUriResolverSet(_projectId, _resolver);
     }
 
@@ -101,6 +118,7 @@ contract TokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
         onlyOwner
     {
         tokenUriResolvers[0] = IJBTokenUriResolver(_resolver);
+
         emit DefaultTokenUriResolverSet(_resolver);
     }
 }
