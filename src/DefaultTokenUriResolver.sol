@@ -116,7 +116,8 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
             } else {
                 // Pad strings shorter than target length
                 string memory padding;
-                for (uint256 i = 0; i < targetLength - length; i++) {
+                uint256 _numberOfChar = targetLength - length;
+                for (uint256 i; i< _numberOfChar; i++){
                     padding = string.concat(padding, " ");
                 }
                 str = string.concat(padding, str);
