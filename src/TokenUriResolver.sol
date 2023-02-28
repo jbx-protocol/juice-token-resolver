@@ -94,11 +94,7 @@ contract TokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
         )
     {
         if (_projectId == 0) revert UNAUTHORIZED();
-        if (_resolver == IJBTokenUriResolver(address(0))) {
-            delete tokenUriResolvers[_projectId];
-        } else {
-            tokenUriResolvers[_projectId] = _resolver;
-        }
+        tokenUriResolvers[_projectId] = _resolver;
         emit ProjectTokenUriResolverSet(_projectId, _resolver);
     }
 
