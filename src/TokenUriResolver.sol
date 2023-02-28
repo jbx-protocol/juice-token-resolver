@@ -15,6 +15,7 @@ import {JBOperatable, IJBOperatorStore} from "@jbx-protocol/juice-contracts-v3/c
  */
 contract TokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
     IJBProjects public immutable projects;
+    uint256 DEFAULT_RESOLVER_GAS_USAGE = 50_000_000;
     event DefaultTokenUriResolverSet(
         IJBTokenUriResolver indexed tokenUriResolver
     );
@@ -60,13 +61,16 @@ contract TokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
         override
         returns (string memory tokenUri)
     {
-        IJBTokenUriResolver tur = tokenUriResolvers[_projectId];
-        if (tur == IJBTokenUriResolver(address(0))) {
+        address tur = address(tokenUriResolvers[_projectId]);
+        if (tur == address(0)) {
             return tokenUriResolvers[0].getUri(_projectId);
         } else {
-            try tur.getUri(_projectId) returns (string memory uri) {
-                return uri;
-            } catch {
+            (bool success, bytes memory data) = tur.call{
+                gas: DEFAULT_RESOLVER_GAS_USAGE
+            }(abi.encodeWithSignature("getUri(uint256)", _projectId));
+            if (success) {
+                return abi.decode(data, (string));
+            } else {
                 return tokenUriResolvers[0].getUri(_projectId);
             }
         }
