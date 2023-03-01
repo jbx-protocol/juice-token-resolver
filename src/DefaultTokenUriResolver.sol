@@ -421,25 +421,6 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
         IJBPaymentTerminal primaryEthPaymentTerminal = directory
             .primaryTerminalOf(_projectId, JBTokens.ETH); // Project's primary ETH payment terminal
 
-        // JBToken ERC20
-        // UNUSED at present
-        // IJBToken jbToken = tokenStore.tokenOf(_projectId);
-        // bool tokenIssued;
-        // string memory jbTokenString;
-        // string memory tokenIssuedString;
-        // address jbTokenAddress = address(jbToken);
-        // if (jbTokenAddress == address(0)) {
-        //     tokenIssued = false;
-        // } else {
-        //     tokenIssued = true;
-        //     jbTokenString = toAsciiString(jbTokenAddress);
-        // }
-        // if (tokenIssued) {
-        //     tokenIssuedString = "True";
-        // } else {
-        //     tokenIssuedString = "False";
-        // }
-
         // Owner
         address owner = projects.ownerOf(_projectId); // Project's owner
         string memory ownerName = getOwnerName(owner);
