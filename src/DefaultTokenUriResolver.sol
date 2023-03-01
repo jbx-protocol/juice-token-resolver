@@ -44,7 +44,8 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
     IJBProjects public projects;
     IJBDirectory public directory;
     IJBTokenStore public tokenStore;
-    IJBSingleTokenPaymentTerminalStore public immutable singleTokenPaymentTerminalStore;
+    IJBSingleTokenPaymentTerminalStore
+        public immutable singleTokenPaymentTerminalStore;
     IJBController public immutable controller;
     IJBProjectHandles public immutable projectHandles;
     ITypeface public immutable capsulesTypeface; // Capsules typeface
@@ -55,9 +56,7 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
         IJBDirectory _directory,
         IJBProjectHandles _projectHandles,
         ITypeface _capsulesTypeface
-    )
-        JBOperatable(_operatorStore)
-    {
+    ) JBOperatable(_operatorStore) {
         directory = _directory;
         projects = directory.projects();
         fundingCycleStore = directory.fundingCycleStore();
@@ -117,7 +116,7 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
                 // Pad strings shorter than target length
                 string memory padding;
                 uint256 _numberOfChar = targetLength - length;
-                for (uint256 i; i< _numberOfChar; i++){
+                for (uint256 i; i < _numberOfChar; i++) {
                     padding = string.concat(padding, " ");
                 }
                 str = string.concat(padding, str);
@@ -404,6 +403,44 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
         emit ThemeSet(_theme.projectId, _theme);
     }
 
+    function getOwnerName(address owner)
+        internal
+        view
+        returns (string memory ownerName)
+    {
+        return
+            string.concat(
+                "0x",
+                slice.slice(toAsciiString(owner), 0, 4),
+                unicode"…",
+                slice.slice(toAsciiString(owner), 36, 40)
+            ); // Abbreviate owner address
+    }
+
+    function getTheme(uint256 _projectId)
+        internal
+        view
+        returns (
+            bytes3 textColor,
+            bytes3 bgColor,
+            bytes3 bgColorDark
+        )
+    {
+        if (themes[_projectId].projectId == 0) {
+            return (
+                themes[0].textColor,
+                themes[0].bgColor,
+                themes[0].bgColorDark
+            );
+        } else {
+            return (
+                themes[_projectId].textColor,
+                themes[_projectId].bgColor,
+                themes[_projectId].bgColorDark
+            );
+        }
+    }
+
     function getUri(uint256 _projectId)
         external
         view
@@ -411,12 +448,9 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
         returns (string memory tokenUri)
     {
         // Load theme
-        Theme memory theme;
-        if (themes[_projectId].projectId == 0) {
-            theme = themes[0];
-        } else {
-            theme = themes[_projectId];
-        }
+        (bytes3 textColor, bytes3 bgColor, bytes3 bgColorDark) = getTheme(
+            _projectId
+        );
 
         // Funding Cycle
         // FC#
@@ -429,37 +463,27 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
             .primaryTerminalOf(_projectId, JBTokens.ETH); // Project's primary ETH payment terminal
 
         // JBToken ERC20
-        IJBToken jbToken = tokenStore.tokenOf(_projectId);
-        bool tokenIssued;
-        string memory jbTokenString;
-        string memory tokenIssuedString;
-        address jbTokenAddress = address(jbToken);
-        if (jbTokenAddress == address(0)) {
-            tokenIssued = false;
-        } else {
-            tokenIssued = true;
-            jbTokenString = toAsciiString(jbTokenAddress);
-        }
-        if (tokenIssued) {
-            tokenIssuedString = "True";
-        } else {
-            tokenIssuedString = "False";
-        }
+        // UNUSED at present
+        // IJBToken jbToken = tokenStore.tokenOf(_projectId);
+        // bool tokenIssued;
+        // string memory jbTokenString;
+        // string memory tokenIssuedString;
+        // address jbTokenAddress = address(jbToken);
+        // if (jbTokenAddress == address(0)) {
+        //     tokenIssued = false;
+        // } else {
+        //     tokenIssued = true;
+        //     jbTokenString = toAsciiString(jbTokenAddress);
+        // }
+        // if (tokenIssued) {
+        //     tokenIssuedString = "True";
+        // } else {
+        //     tokenIssuedString = "False";
+        // }
 
         // Owner
         address owner = projects.ownerOf(_projectId); // Project's owner
-        string memory ownerName;
-        // TODO Use AddressToENSString library (wip) to resolve ENS address onchain
-        // try resolver.name(reverseRegistrar.node(owner)) returns (string memory _ownerName) {
-        //     ownerName = _ownerName;
-        // } catch {
-        ownerName = string.concat(
-            "0x",
-            slice.slice(toAsciiString(owner), 0, 4),
-            unicode"…",
-            slice.slice(toAsciiString(owner), 36, 40)
-        ); // Abbreviate owner address
-        // }
+        string memory ownerName = getOwnerName(owner);
 
         string memory projectOwnerPaddedRight = pad(
             false,
@@ -492,11 +516,11 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
                 '<svg width="289" height="403" viewBox="0 0 289 403" xmlns="http://www.w3.org/2000/svg"><style>@font-face{font-family:"Capsules-500";src:url(data:font/truetype;charset=utf-8;base64,',
                 getFontSource(), // import Capsules typeface
                 ');format("opentype");}a,a:visited,a:hover{fill:inherit;text-decoration:none;}text{font-size:16px;fill:#',
-                theme.textColor,
+                textColor,
                 ';font-family:"Capsules-500",monospace;font-weight:500;white-space:pre;}#head text{fill:#',
-                theme.bgColor,
+                bgColor,
                 ';}</style><g clip-path="url(#clip0)"><path d="M289 0H0V403H289V0Z" fill="url(#paint0)"/><rect width="289" height="22" fill="#',
-                theme.textColor,
+                textColor,
                 '"/><g id="head"><a href="https://juicebox.money/v2/p/',
                 _projectId.toString(),
                 '">', // Line 0: Head
@@ -539,22 +563,30 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
                 ownerName,
                 "</a>",
                 '</text></g></g><defs><filter id="filter1" x="-3.36" y="26.04" width="294.539" height="126.12" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/><feOffset/><feGaussianBlur stdDeviation="2"/><feComposite in2="hardAlpha" operator="out"/> <feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 0.572549 0 0 0 0 0.0745098 0 0 0 0.68 0"/><feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_150_56"/><feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_150_56" result="shape"/></filter><linearGradient id="paint0" x1="0" y1="202" x2="289" y2="202" gradientUnits="userSpaceOnUse"><stop stop-color="#',
-                theme.bgColorDark,
+                bgColorDark,
                 '"/><stop offset="0.119792" stop-color="#',
-                theme.bgColor,
+                bgColor,
                 '"/><stop offset="0.848958" stop-color="#',
-                theme.bgColor,
+                bgColor,
                 '"/><stop offset="1" stop-color="#',
-                theme.bgColorDark,
+                bgColorDark,
                 '"/></linearGradient><clipPath id="clip0"><rect width="289" height="403" /></clipPath></defs></svg>'
             )
         );
         parts[3] = string('"}');
-        string memory uri = string.concat(
+        string memory uri = concatUriParts(parts);
+        return uri;
+    }
+
+    function concatUriParts(string[] memory parts)
+        internal
+        pure
+        returns (string memory uri)
+    {
+        string.concat(
             parts[0],
             Base64.encode(abi.encodePacked(parts[1], parts[2], parts[3]))
         );
-        return uri;
     }
 
     // borrowed from https://ethereum.stackexchange.com/questions/8346/convert-address-to-string
