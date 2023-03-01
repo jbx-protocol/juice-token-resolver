@@ -102,44 +102,28 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
         uint256 targetLength
     ) internal view returns (string memory) {
         uint256 length = bytes(str).length;
-        if (left) {
-            // Left pad
-            if (length > targetLength) {
-                // Shorten strings strings longer than target length
-                str = string.concat(
-                    slice.slice(str, 0, targetLength - 1),
-                    unicode"…"
-                ); // Shortens to 1 character less than target length and adds an ellipsis unicode character
-            } else if (length == targetLength) {
-                return str;
-            } else {
-                // Pad strings shorter than target length
-                string memory padding;
-                uint256 _numberOfChar = targetLength - length;
-                for (uint256 i; i < _numberOfChar; i++) {
-                    padding = string.concat(padding, " ");
-                }
-                str = string.concat(padding, str);
-            }
+        
+        // If string is already target length, return it
+        if (length == targetLength){
             return str;
-        } else {
-            // Right pad
-            if (length > targetLength) {
+        } 
+
+        // If string is longer than target length, abbreviate it and add an ellipsis
+        if (length>targetLength){
                 str = string.concat(
-                    slice.slice(str, 0, targetLength - 1),
-                    unicode"…"
-                ); // Shortens to 1 character less than target length and adds an ellipsis unicode character
-            } else if (length == targetLength) {
-                return str;
-            } else {
-                string memory padding;
-                for (uint256 i = 0; i < targetLength - length; i++) {
-                    padding = string.concat(padding, " ");
-                }
-                str = string.concat(str, padding);
-            }
-            return str;
+                    slice.slice(str, 0, targetLength - 1), // Abbreviate to 1 character less than target length
+                    unicode"…"); // And add an ellipsis
+                    return str;
         }
+
+        // If string is shorter than target length, pad it on the left or right as specified
+        string memory padding; 
+        uint256 _paddingToAdd = targetLength - length;
+        for (uint256 i; i < _paddingToAdd; i++) {
+            padding = string.concat(padding, " ");
+        }
+        str = left ?  string.concat(padding, str) : string.concat(str, padding);
+        return str;
     }
 
     function getProjectName(uint256 _projectId)
