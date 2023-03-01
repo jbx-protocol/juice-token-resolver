@@ -8,8 +8,8 @@ pragma solidity ^0.8.0;
  * @member bgColorDark The hex color of the background in dark mode.
  */
 struct Theme {
-    uint184 projectId;
-    bytes3 textColor;
-    bytes3 bgColor;
-    bytes3 bgColorDark;
+    uint256 projectId;
+    string textColor;
+    string bgColor;
+    string bgColorDark;
 }
