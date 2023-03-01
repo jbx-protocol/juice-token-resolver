@@ -572,6 +572,7 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
             parts[0],
             Base64.encode(abi.encodePacked(parts[1], parts[2], parts[3]))
         );
+        return uri;
     }
 
     // borrowed from https://ethereum.stackexchange.com/questions/8346/convert-address-to-string
