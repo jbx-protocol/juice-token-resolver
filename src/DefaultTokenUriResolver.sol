@@ -40,10 +40,10 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
     event ThemeSet(uint256 projectId, Theme theme);
     error InvalidTheme();
 
-    IJBFundingCycleStore public fundingCycleStore;
-    IJBProjects public projects;
-    IJBDirectory public directory;
-    IJBTokenStore public tokenStore;
+    IJBFundingCycleStore public immutable fundingCycleStore;
+    IJBProjects public immutable projects;
+    IJBDirectory public immutable directory;
+    IJBTokenStore public immutable tokenStore;
     IJBSingleTokenPaymentTerminalStore
         public immutable singleTokenPaymentTerminalStore;
     IJBController public immutable controller;
@@ -120,8 +120,11 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
         // If string is shorter than target length, pad it on the left or right as specified
         string memory padding;
         uint256 _paddingToAdd = targetLength - length;
-        for (uint256 i; i < _paddingToAdd; i++) {
+        for (uint256 i; i < _paddingToAdd;) {
             padding = string.concat(padding, " ");
+            unchecked {
+                ++ i;
+            }
         }
         str = left ? string.concat(padding, str) : string.concat(str, padding);
         return str;
@@ -526,12 +529,15 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
     // borrowed from https://ethereum.stackexchange.com/questions/8346/convert-address-to-string
     function toAsciiString(address x) internal pure returns (string memory) {
         bytes memory s = new bytes(40);
-        for (uint256 i = 0; i < 20; i++) {
+        for (uint256 i = 0; i < 20;) {
             bytes1 b = bytes1(uint8(uint256(uint160(x)) / (2**(8 * (19 - i)))));
             bytes1 hi = bytes1(uint8(b) / 16);
             bytes1 lo = bytes1(uint8(b) - 16 * uint8(hi));
             s[2 * i] = char(hi);
             s[2 * i + 1] = char(lo);
+            unchecked {
+                ++ i;
+            }
         }
         return string(s);
     }
