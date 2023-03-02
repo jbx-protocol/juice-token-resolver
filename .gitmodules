@@ -8,3 +8,6 @@
 [submodule "lib/typeface"]
 	path = lib/typeface
 	url = https://github.com/peripheralist/typeface
+[submodule "lib/solcolor"]
+	path = lib/solcolor
+	url = https://github.com/xBA5ED/solcolor
