@@ -69,17 +69,12 @@ contract ContractTest is Test {
 
     // Tests that setting a new default resolver works
     function testSetDefaultMetadata() external {
+        uint256 projectId = 1;
         // Get the default metadata
-        string memory defaultMetadata = t.getUri(1);
+        string memory defaultMetadata = t.getUri(projectId);
         // Set a theme on the original resolver
-        Theme memory customTheme = Theme({
-            projectId: 1,
-            textColor: "fff",
-            bgColor: "000",
-            bgColorDark: "000"
-        });
         vm.prank(0xAF28bcB48C40dBC86f52D459A6562F658fc94B1e);
-        d.setTheme(customTheme);
+        d.setTheme(projectId, "fff", "000", "000");
         // Create and set a new default resolver
         DefaultTokenUriResolver n = new DefaultTokenUriResolver(
             _operatorStore
@@ -268,15 +263,10 @@ contract ContractTest is Test {
 
     // Tests that project owners can set themes on the default resolver and they render correctly when called from the tokenUriResolver.
     function testSetTheme() external {
-        Theme memory customTheme = Theme({
-            projectId: 1,
-            textColor: "fff",
-            bgColor: "faa",
-            bgColorDark: "000"
-        });
+        uint256 projectId = 1; 
         vm.prank(0xAF28bcB48C40dBC86f52D459A6562F658fc94B1e);
-        d.setTheme(customTheme);
-        string memory x = t.getUri(1); // 1, 311, 305, 308, 323
+        d.setTheme(projectId, "fff", "faa", "000");
+        string memory x = t.getUri(projectId); // 1, 311, 305, 308, 323
         string[] memory inputs = new string[](3);
         inputs[0] = "node";
         inputs[1] = "./open.js";
