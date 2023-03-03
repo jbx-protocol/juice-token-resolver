@@ -20,6 +20,7 @@ import {Theme} from "./Structs/Theme.sol";
 import {Base64} from "base64-sol/base64.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {Font, ITypeface} from "typeface/interfaces/ITypeface.sol";
+import "solcolor/src/Color.sol";
 
 contract StringSlicer {
     // This function is in a separate contract so that TokenUriResolver can pass it a string memory and we can still use Array Slices (which only work on calldata)
@@ -34,10 +35,16 @@ contract StringSlicer {
 
 contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
     using Strings for uint256;
+
     StringSlicer slice = new StringSlicer();
 
     event Log(string message);
-    event ThemeSet(uint256 projectId, string textColor, string bgColor, string bgColorDark);
+    event ThemeSet(
+        uint256 projectId,
+        Color textColor,
+        Color bgColor,
+        Color bgColorDark
+    );
     error InvalidTheme();
 
     IJBFundingCycleStore public immutable fundingCycleStore;
@@ -75,9 +82,9 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
         capsulesTypeface = _capsulesTypeface;
         themes[0] = Theme({
             customTheme: false,
-            textColor: "FF9213",
-            bgColor: "44190F",
-            bgColorDark: "3A0F0C"
+            textColor: newColorFromRGBString("FF9213"),
+            bgColor: newColorFromRGBString("44190F"),
+            bgColorDark: newColorFromRGBString("3A0F0C")
         });
     }
 
@@ -120,10 +127,10 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
         // If string is shorter than target length, pad it on the left or right as specified
         string memory padding;
         uint256 _paddingToAdd = targetLength - length;
-        for (uint256 i; i < _paddingToAdd;) {
+        for (uint256 i; i < _paddingToAdd; ) {
             padding = string.concat(padding, " ");
             unchecked {
-                ++ i;
+                ++i;
             }
         }
         str = left ? string.concat(padding, str) : string.concat(str, padding);
@@ -377,19 +384,24 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
         return string.concat(paddedTotalSupplyRight, paddedTotalSupplyLeft);
     }
 
-    // TODO write tests
-    // could move from projectId out of Theme and into setTheme args
-    function setTheme(uint256 projectId, string memory textColor, string memory bgColor, string memory bgColorDark)
+    function setTheme(
+        uint256 _projectId,
+        string memory _textColor,
+        string memory _bgColor,
+        string memory _bgColorDark
+    )
         external
         requirePermission(
-            projects.ownerOf(projectId),
-            projectId,
+            projects.ownerOf(_projectId),
+            _projectId,
             JBUriOperations.SET_TOKEN_URI
         )
     {
-        if (projectId == 0) revert InvalidTheme(); // Cannot set theme for project 0
-        themes[projectId] =  Theme(true,  textColor,  bgColor,  bgColorDark);
-        emit ThemeSet(projectId, textColor, bgColor, bgColorDark);
+        Color textColor = newColorFromRGBString(_textColor);
+        Color bgColor = newColorFromRGBString(_bgColor);
+        Color bgColorDark = newColorFromRGBString(_bgColorDark);
+        themes[_projectId] = Theme(true, textColor, bgColor, bgColorDark);
+        emit ThemeSet(_projectId, textColor, bgColor, bgColorDark);
     }
 
     function getOwnerName(address owner)
@@ -412,22 +424,26 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
         override
         returns (string memory tokenUri)
     {
-        // Owner
+        // Owner & Owner Name
         address owner = projects.ownerOf(_projectId); // Project's owner
-
-        string memory projectName = getProjectName(_projectId);
-
-        Theme memory theme = themes[_projectId].customTheme == true
-            ? themes[_projectId]
-            : themes[0];
-
+        string memory ownerName = getOwnerName(owner);
         string memory projectOwnerPaddedRight = pad(
             false,
             unicode"  ᴘʀoᴊᴇcᴛ owɴᴇʀ",
             28
         );
 
-        string memory ownerName = getOwnerName(owner);
+        // Project Name
+        string memory projectName = getProjectName(_projectId);
+
+        // Theme
+        Theme memory theme = themes[_projectId].customTheme == true
+            ? themes[_projectId]
+            : themes[0];
+
+        string memory textColor = LibColor.toString(theme.textColor);
+        string memory bgColor = LibColor.toString(theme.bgColor);
+        string memory bgColorDark = LibColor.toString(theme.bgColorDark);
 
         // Funding Cycle
         // FC#
@@ -461,11 +477,11 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
             '<svg width="289" height="403" viewBox="0 0 289 403" xmlns="http://www.w3.org/2000/svg"><style>@font-face{font-family:"Capsules-500";src:url(data:font/truetype;charset=utf-8;base64,',
             getFontSource(), // import Capsules typeface
             ');format("opentype");}a,a:visited,a:hover{fill:inherit;text-decoration:none;}text{font-size:16px;fill:#',
-            theme.textColor,
+            textColor,
             ';font-family:"Capsules-500",monospace;font-weight:500;white-space:pre;}#head text{fill:#',
-            theme.bgColor,
+            bgColor,
             ';}</style><g clip-path="url(#clip0)"><path d="M289 0H0V403H289V0Z" fill="url(#paint0)"/><rect width="289" height="22" fill="#',
-            theme.textColor,
+            textColor,
             '"/><g id="head"><a href="https://juicebox.money/v2/p/',
             _projectId.toString(),
             '">', // Line 0: Head
@@ -514,13 +530,13 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
         svg = abi.encodePacked(
             svg,
             '</text></g></g><defs><filter id="filter1" x="-3.36" y="26.04" width="294.539" height="126.12" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/><feOffset/><feGaussianBlur stdDeviation="2"/><feComposite in2="hardAlpha" operator="out"/> <feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 0.572549 0 0 0 0 0.0745098 0 0 0 0.68 0"/><feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_150_56"/><feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_150_56" result="shape"/></filter><linearGradient id="paint0" x1="0" y1="202" x2="289" y2="202" gradientUnits="userSpaceOnUse"><stop stop-color="#',
-            theme.bgColorDark,
+            bgColorDark,
             '"/><stop offset="0.119792" stop-color="#',
-            theme.bgColor,
+            bgColor,
             '"/><stop offset="0.848958" stop-color="#',
-            theme.bgColor,
+            bgColor,
             '"/><stop offset="1" stop-color="#',
-            theme.bgColorDark,
+            bgColorDark,
             '"/></linearGradient><clipPath id="clip0"><rect width="289" height="403" /></clipPath></defs></svg>'
         );
         parts[2] = Base64.encode(svg);
@@ -535,14 +551,14 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
     // borrowed from https://ethereum.stackexchange.com/questions/8346/convert-address-to-string
     function toAsciiString(address x) internal pure returns (string memory) {
         bytes memory s = new bytes(40);
-        for (uint256 i = 0; i < 20;) {
+        for (uint256 i = 0; i < 20; ) {
             bytes1 b = bytes1(uint8(uint256(uint160(x)) / (2**(8 * (19 - i)))));
             bytes1 hi = bytes1(uint8(b) / 16);
             bytes1 lo = bytes1(uint8(b) - 16 * uint8(hi));
             s[2 * i] = char(hi);
             s[2 * i + 1] = char(lo);
             unchecked {
-                ++ i;
+                ++i;
             }
         }
         return string(s);

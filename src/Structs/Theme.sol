@@ -1,6 +1,8 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+import {Color} from "solcolor/src/Types.sol";
+
 /**
  * @member customTheme True for all Themes except the default theme
  * @member textColor The hex color of the text.
@@ -9,7 +11,7 @@ pragma solidity ^0.8.0;
  */
 struct Theme {
     bool customTheme;
-    string textColor;
-    string bgColor;
-    string bgColorDark;
+    Color textColor;
+    Color bgColor;
+    Color bgColorDark;
 }
