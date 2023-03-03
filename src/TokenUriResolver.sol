@@ -79,6 +79,10 @@ contract TokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
     {
         address _resolver = address(tokenUriResolvers[_projectId]);
 
+        if (_resolver == address(0)){
+            return tokenUriResolvers[0].getUri(_projectId);
+        } 
+            
         try IJBTokenUriResolver(_resolver).getUri{gas: DEFAULT_RESOLVER_GAS_USAGE}(_projectId) returns (string memory _tokenUri) {
             return _tokenUri;
         } catch {
