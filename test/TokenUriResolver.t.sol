@@ -34,10 +34,6 @@ contract ContractTest is Test {
         IJBProjectHandles(0xE3c01E9Fd2a1dCC6edF0b1058B5757138EF9FfB6);
     ITypeface public _capsulesTypeface =
         ITypeface(0xA77b7D93E79f1E6B4f77FaB29d9ef85733A3D44A);
-    // IReverseRegistrar public _reverseRegistrar =
-    //     IReverseRegistrar(0x084b1c3C81545d370f3634392De611CaaBFf8148);
-    // IResolver public _resolver =
-    //     IResolver(0xA2C122BE93b0074270ebeE7f6b7292C7deB45047);
 
     DefaultTokenUriResolver d =
         new DefaultTokenUriResolver(
@@ -45,8 +41,6 @@ contract ContractTest is Test {
             ,_directory
             ,_projectHandles
             ,_capsulesTypeface
-            // ,_reverseRegistrar
-            // ,_resolver
         );
 
     TokenUriResolver t = new TokenUriResolver(_projects, _operatorStore, d);
@@ -74,7 +68,7 @@ contract ContractTest is Test {
         string memory defaultMetadata = t.getUri(projectId);
         // Set a theme on the original resolver
         vm.prank(0xAF28bcB48C40dBC86f52D459A6562F658fc94B1e);
-        d.setTheme(projectId, "fff", "000", "000");
+        d.setTheme(projectId, "fffFFF", "000FFF", "000FFF");
         // Create and set a new default resolver
         DefaultTokenUriResolver n = new DefaultTokenUriResolver(
             _operatorStore
@@ -101,7 +95,7 @@ contract ContractTest is Test {
     }
 
     // Tests that calls to getUri fail when no working resolver is set, and that setting a new default resolver works correctly
-    function testGetDefaultMetadata2() external {
+    function testGetNoDefaultSet() external {
         TokenUriResolver x = new TokenUriResolver(
             _projects,
             _operatorStore,
@@ -265,7 +259,7 @@ contract ContractTest is Test {
     function testSetTheme() external {
         uint256 projectId = 1; 
         vm.prank(0xAF28bcB48C40dBC86f52D459A6562F658fc94B1e);
-        d.setTheme(projectId, "fff", "faa", "000");
+        d.setTheme(projectId, "FFFFFF", "FFFAAA", "FFFAAA");
         string memory x = t.getUri(projectId); // 1, 311, 305, 308, 323
         string[] memory inputs = new string[](3);
         inputs[0] = "node";
