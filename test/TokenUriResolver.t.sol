@@ -68,15 +68,13 @@ contract ContractTest is Test {
         string memory defaultMetadata = t.getUri(projectId);
         // Set a theme on the original resolver
         vm.prank(0xAF28bcB48C40dBC86f52D459A6562F658fc94B1e);
-        d.setTheme(projectId, "fffFFF", "000FFF", "000FFF");
+        d.setTheme(projectId, "FFFFFF", "000FFF", "000FFF");
         // Create and set a new default resolver
         DefaultTokenUriResolver n = new DefaultTokenUriResolver(
             _operatorStore
             ,_directory
             ,_projectHandles
             ,_capsulesTypeface
-            // ,_reverseRegistrar
-            // ,_resolver
         );
         t.setDefaultTokenUriResolver(n);
         assertEq(
@@ -109,8 +107,6 @@ contract ContractTest is Test {
             ,_directory
             ,_projectHandles
             ,_capsulesTypeface
-            // ,_reverseRegistrar
-            // ,_resolver
         );
         x.setDefaultTokenUriResolver(y);
         x.getUri(1);
