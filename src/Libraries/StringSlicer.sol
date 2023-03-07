@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
 library StringSlicer {
     /// @notice Abbreviates a string.
     /// @dev This function uses Array Slices (https://blog.soliditylang.org/2020/05/26/array-slices/), which only work on calldata. The function must therefore live in a separate contract for a Token Resolver to use Array Slices.

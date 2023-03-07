@@ -95,7 +95,7 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
         bool left,
         string memory str,
         uint256 targetLength
-    ) internal view returns (string memory) {
+    ) internal pure returns (string memory) {
         uint256 length = bytes(str).length;
 
         // If string is already target length, return it
@@ -125,11 +125,9 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
         return str;
     }
 
-    function getProjectName(uint256 _projectId)
-        internal
-        view
-        returns (string memory projectName)
-    {
+    function getProjectName(
+        uint256 _projectId
+    ) internal view returns (string memory projectName) {
         // Project Handle
         string memory _projectName;
         // If handle is set
@@ -156,21 +154,17 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
         return _projectName;
     }
 
-    function getOverflowString(uint256 _projectId)
-        internal
-        view
-        returns (string memory overflowString)
-    {
+    function getOverflowString(
+        uint256 _projectId
+    ) internal view returns (string memory overflowString) {
         uint256 overflow = singleTokenPaymentTerminalStore
             .currentTotalOverflowOf(_projectId, 0, 1); // Project's overflow to 0 decimals
         return string.concat(unicode"Ξ", overflow.toString());
     }
 
-    function getOverflowRow(string memory overflowString)
-        internal
-        view
-        returns (string memory overflowRow)
-    {
+    function getOverflowRow(
+        string memory overflowString
+    ) internal pure returns (string memory overflowRow) {
         string memory paddedOverflowLeft = string.concat(
             pad(true, overflowString, 14),
             "  "
@@ -181,22 +175,18 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
         return string.concat(paddedOverflowRight, paddedOverflowLeft);
     }
 
-    function getRightPaddedFC(JBFundingCycle memory _fundingCycle)
-        internal
-        view
-        returns (string memory rightPaddedFCString)
-    {
+    function getRightPaddedFC(
+        JBFundingCycle memory _fundingCycle
+    ) internal pure returns (string memory rightPaddedFCString) {
         uint256 currentFundingCycleId = _fundingCycle.number; // Project's current funding cycle id
         string memory fundingCycleIdString = currentFundingCycleId.toString();
         return
             pad(false, string.concat(unicode"  ꜰc ", fundingCycleIdString), 17);
     }
 
-    function getLeftPaddedTimeLeft(JBFundingCycle memory _fundingCycle)
-        internal
-        view
-        returns (string memory leftPaddedTimeLeftString)
-    {
+    function getLeftPaddedTimeLeft(
+        JBFundingCycle memory _fundingCycle
+    ) internal view returns (string memory leftPaddedTimeLeftString) {
         // Time Left
         uint256 start = _fundingCycle.start; // Project's funding cycle start time
         uint256 duration = _fundingCycle.duration; // Project's current funding cycle duration
@@ -275,11 +265,9 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
         return paddedTimeLeft;
     }
 
-    function getFCTimeLeftRow(JBFundingCycle memory fundingCycle)
-        internal
-        view
-        returns (string memory fCTimeLeftRow)
-    {
+    function getFCTimeLeftRow(
+        JBFundingCycle memory fundingCycle
+    ) internal view returns (string memory fCTimeLeftRow) {
         return
             string.concat(
                 getRightPaddedFC(fundingCycle),
@@ -295,7 +283,7 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
         uint256 balance = singleTokenPaymentTerminalStore.balanceOf(
             IJBSingleTokenPaymentTerminal(address(primaryEthPaymentTerminal)),
             _projectId
-        ) / 10**18; // Project's ETH balance //TODO Try/catch
+        ) / 10 ** 18; // Project's ETH balance //TODO Try/catch
         string memory paddedBalanceLeft = string.concat(
             pad(true, string.concat(unicode"Ξ", balance.toString()), 14),
             "  "
@@ -333,7 +321,7 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
         }
         string memory distributionLimit = string.concat(
             distributionLimitCurrency,
-            (distributionLimitPreprocessed / 10**18).toString()
+            (distributionLimitPreprocessed / 10 ** 18).toString()
         ); // Project's distribution limit
         string memory paddedDistributionLimitLeft = string.concat(
             pad(
@@ -353,13 +341,11 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
             );
     }
 
-    function getTotalSupplyRow(uint256 _projectId)
-        internal
-        view
-        returns (string memory totalSupplyRow)
-    {
+    function getTotalSupplyRow(
+        uint256 _projectId
+    ) internal view returns (string memory totalSupplyRow) {
         // Supply
-        uint256 totalSupply = tokenStore.totalSupplyOf(_projectId) / 10**18; // Project's token total supply
+        uint256 totalSupply = tokenStore.totalSupplyOf(_projectId) / 10 ** 18; // Project's token total supply
         string memory paddedTotalSupplyLeft = string.concat(
             pad(true, totalSupply.toString(), 13),
             "  "
@@ -392,11 +378,9 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
         emit ThemeSet(_projectId, textColor, bgColor, bgColorDark);
     }
 
-    function getOwnerName(address owner)
-        internal
-        view
-        returns (string memory ownerName)
-    {
+    function getOwnerName(
+        address owner
+    ) internal pure returns (string memory ownerName) {
         return
             string.concat(
                 "0x",
@@ -406,12 +390,9 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
             ); // Abbreviate owner address
     }
 
-    function getUri(uint256 _projectId)
-        external
-        view
-        override
-        returns (string memory tokenUri)
-    {
+    function getUri(
+        uint256 _projectId
+    ) external view override returns (string memory tokenUri) {
         // Owner & Owner Name
         address owner = projects.ownerOf(_projectId); // Project's owner
         string memory ownerName = getOwnerName(owner);
@@ -542,7 +523,9 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
     function toAsciiString(address x) internal pure returns (string memory) {
         bytes memory s = new bytes(40);
         for (uint256 i = 0; i < 20; ) {
-            bytes1 b = bytes1(uint8(uint256(uint160(x)) / (2**(8 * (19 - i)))));
+            bytes1 b = bytes1(
+                uint8(uint256(uint160(x)) / (2 ** (8 * (19 - i))))
+            );
             bytes1 hi = bytes1(uint8(b) / 16);
             bytes1 lo = bytes1(uint8(b) - 16 * uint8(hi));
             s[2 * i] = char(hi);
