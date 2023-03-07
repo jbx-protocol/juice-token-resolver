@@ -21,22 +21,10 @@ import {Base64} from "base64-sol/base64.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {Font, ITypeface} from "typeface/interfaces/ITypeface.sol";
 import "solcolor/src/Color.sol";
-
-contract StringSlicer {
-    // This function is in a separate contract so that TokenUriResolver can pass it a string memory and we can still use Array Slices (which only work on calldata)
-    function slice(
-        string calldata _str,
-        uint256 _start,
-        uint256 _end
-    ) external pure returns (string memory) {
-        return string(bytes(_str)[_start:_end]);
-    }
-}
+import {StringSlicer} from "./Libraries/StringSlicer.sol";
 
 contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
     using Strings for uint256;
-
-    StringSlicer slice = new StringSlicer();
 
     event Log(string message);
     event ThemeSet(
@@ -118,7 +106,7 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
         // If string is longer than target length, abbreviate it and add an ellipsis
         if (length > targetLength) {
             str = string.concat(
-                slice.slice(str, 0, targetLength - 1), // Abbreviate to 1 character less than target length
+                StringSlicer.slice(str, 0, targetLength - 1), // Abbreviate to 1 character less than target length
                 unicode"…"
             ); // And add an ellipsis
             return str;
@@ -161,7 +149,7 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
         // Abbreviate handle to 27 chars if longer
         if (bytes(_projectName).length > 26) {
             _projectName = string.concat(
-                slice.slice(_projectName, 0, 26),
+                StringSlicer.slice(_projectName, 0, 26),
                 unicode"…"
             );
         }
@@ -412,9 +400,9 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
         return
             string.concat(
                 "0x",
-                slice.slice(toAsciiString(owner), 0, 4),
+                StringSlicer.slice(toAsciiString(owner), 0, 4),
                 unicode"…",
-                slice.slice(toAsciiString(owner), 36, 40)
+                StringSlicer.slice(toAsciiString(owner), 36, 40)
             ); // Abbreviate owner address
     }
 
