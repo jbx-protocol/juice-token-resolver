@@ -25,6 +25,7 @@ import {StringSlicer} from "./Libraries/StringSlicer.sol";
 
 contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
     using Strings for uint256;
+    using LibColor for Color;
 
     event Log(string message);
     event ThemeSet(
@@ -390,131 +391,68 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
             ); // Abbreviate owner address
     }
 
-    function getUri(
-        uint256 _projectId
-    ) external view override returns (string memory tokenUri) {
-        // Owner & Owner Name
-        address owner = projects.ownerOf(_projectId); // Project's owner
-        string memory ownerName = getOwnerName(owner);
-        string memory projectOwnerPaddedRight = pad(
-            false,
-            unicode"  ᴘʀoᴊᴇcᴛ owɴᴇʀ",
-            28
-        );
+    function getUri(uint256 _projectId)
+        external
+        view
+        override
+        returns (string memory tokenUri)
+    {
+        
+        string[] memory parts = new string[](2);
+        {
+            // Project Name
+            string memory projectName = getProjectName(_projectId);
 
-        // Project Name
-        string memory projectName = getProjectName(_projectId);
+            // Get Project's Primary ETH Terminal
+            IJBPaymentTerminal primaryEthPaymentTerminal = directory
+                .primaryTerminalOf(_projectId, JBTokens.ETH);
 
-        // Theme
-        Theme memory theme = themes[_projectId].customTheme == true
-            ? themes[_projectId]
-            : themes[0];
+            parts[0] = string(
+                abi.encodePacked(
+                    '{"name":"',
+                    projectName,
+                    '", "description":"',
+                    projectName,
+                    " is a project on the Juicebox Protocol. It has an overflow of ",
+                    // getOverflowString(_projectId),
+                    ' ETH.", "image":"data:image/svg+xml;base64,'
+                )
+            );
 
-        string memory textColor = LibColor.toString(theme.textColor);
-        string memory bgColor = LibColor.toString(theme.bgColor);
-        string memory bgColorDark = LibColor.toString(theme.bgColorDark);
+            // Owner
+            address owner = projects.ownerOf(_projectId); // Project's owner
+            
+            // Each line (row) of the SVG is 30 monospaced characters long
+            // The first half of each line (15 chars) is the title
+            // The second half of each line (15 chars) is the value
+            // The first and last characters on the line are two spaces
+            // The first line (head) is an exception.
+            parts[1] = Base64.encode(
+                getPartThree(
+                    getPartTwo(
+                    getPartOne(_projectId, projectName),
+                    _projectId,
+                    primaryEthPaymentTerminal,
+                    pad(
+                        false,
+                        unicode"  ᴘʀoᴊᴇcᴛ owɴᴇʀ",
+                        28
+                    ),
+                    owner
+                 ),
+                 _projectId
+                )
+            );
+        }
+  
 
-        // Funding Cycle
-        // FC#
-        JBFundingCycle memory fundingCycle = fundingCycleStore.currentOf(
-            _projectId
-        );
-
-        // Get Project's Primary ETH Terminal
-        IJBPaymentTerminal primaryEthPaymentTerminal = directory
-            .primaryTerminalOf(_projectId, JBTokens.ETH);
-
-        string[] memory parts = new string[](4);
-        parts[0] = string("data:application/json;base64,");
-        parts[1] = string(
-            abi.encodePacked(
-                '{"name":"',
-                projectName,
-                '", "description":"',
-                projectName,
-                " is a project on the Juicebox Protocol. It has an overflow of ",
-                getOverflowString(_projectId),
-                ' ETH.", "image":"data:image/svg+xml;base64,'
-            )
-        );
-        // Each line (row) of the SVG is 30 monospaced characters long
-        // The first half of each line (15 chars) is the title
-        // The second half of each line (15 chars) is the value
-        // The first and last characters on the line are two spaces
-        // The first line (head) is an exception.
-        bytes memory svg = abi.encodePacked(
-            '<svg width="289" height="403" viewBox="0 0 289 403" xmlns="http://www.w3.org/2000/svg"><style>@font-face{font-family:"Capsules-500";src:url(data:font/truetype;charset=utf-8;base64,',
-            getFontSource(), // import Capsules typeface
-            ');format("opentype");}a,a:visited,a:hover{fill:inherit;text-decoration:none;}text{font-size:16px;fill:#',
-            textColor,
-            ';font-family:"Capsules-500",monospace;font-weight:500;white-space:pre;}#head text{fill:#',
-            bgColor,
-            ';}</style><g clip-path="url(#clip0)"><path d="M289 0H0V403H289V0Z" fill="url(#paint0)"/><rect width="289" height="22" fill="#',
-            textColor,
-            '"/><g id="head"><a href="https://juicebox.money/v2/p/',
-            _projectId.toString(),
-            '">', // Line 0: Head
-            '<text x="16" y="16">',
-            projectName,
-            '</text></a><a href="https://juicebox.money"><text x="259.25" y="16">',
-            unicode"",
-            "</text></a></g>"
-        );
-        svg = abi.encodePacked(
-            svg,
-            // Line 1: FC + Time left
-            '<g filter="url(#filter1)"><text x="0" y="48">',
-            getFCTimeLeftRow(fundingCycle),
-            "</text>",
-            // Line 2: Spacer
-            '<text x="0" y="64">',
-            unicode"                              ",
-            "</text>",
-            // Line 3: Balance
-            '<text x="0" y="80">',
-            getBalanceRow(primaryEthPaymentTerminal, _projectId),
-            "</text>",
-            // Line 4: Overflow
-            '<text x="0" y="96">',
-            getOverflowRow(getOverflowString(_projectId)),
-            "</text>",
-            // Line 5: Distribution Limit
-            '<text x="0" y="112">',
-            getDistributionLimitRow(primaryEthPaymentTerminal, _projectId),
-            "</text>",
-            // Line 6: Total Supply
-            '<text x="0" y="128">',
-            getTotalSupplyRow(_projectId),
-            "</text>",
-            // Line 7: Project Owner
-            '<text x="0" y="144">',
-            projectOwnerPaddedRight,
-            "  ", // additional spaces hard coded for this line, presumes address is 11 chars long
-            '<a href="https://etherscan.io/address/',
-            toAsciiString(owner),
-            '">',
-            ownerName,
-            "</a>"
-        );
-        svg = abi.encodePacked(
-            svg,
-            '</text></g></g><defs><filter id="filter1" x="-3.36" y="26.04" width="294.539" height="126.12" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feMorphology operator="dilate" radius="0.1" in="SourceAlpha" result="thicken"/><feGaussianBlur in="thicken" stdDeviation="0.5" result="blurred"/><feFlood flood-color="#',
-            textColor,
-            '" result="glowColor"/><feComposite in="glowColor" in2="blurred" operator="in" result="softGlow_colored"/><feMerge><feMergeNode in="softGlow_colored"/><feMergeNode in="SourceGraphic"/></feMerge></filter><linearGradient id="paint0" x1="0" y1="202" x2="289" y2="202" gradientUnits="userSpaceOnUse"><stop stop-color="#',
-            bgColorDark,
-            '"/><stop offset="0.119792" stop-color="#',
-            bgColor,
-            '"/><stop offset="0.848958" stop-color="#',
-            bgColor,
-            '"/><stop offset="1" stop-color="#',
-            bgColorDark,
-            '"/></linearGradient><clipPath id="clip0"><rect width="289" height="403" /></clipPath></defs></svg>'
-        );
-        parts[2] = Base64.encode(svg);
-        parts[3] = string('"}'); // Close the JSON object
+        // parts[3] = string('"}'); // Close the JSON object
         string memory uri = string.concat(
-            parts[0],
-            Base64.encode(abi.encodePacked(parts[1], parts[2], parts[3]))
+            string("data:application/json;base64,"),
+            Base64.encode(
+                abi.encodePacked(
+                    parts[0], parts[1], string('"}')
+                ))
         );
         return uri;
     }
@@ -523,9 +461,7 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
     function toAsciiString(address x) internal pure returns (string memory) {
         bytes memory s = new bytes(40);
         for (uint256 i = 0; i < 20; ) {
-            bytes1 b = bytes1(
-                uint8(uint256(uint160(x)) / (2 ** (8 * (19 - i))))
-            );
+            bytes1 b = bytes1(uint8(uint256(uint160(x)) / (2**(8 * (19 - i)))));
             bytes1 hi = bytes1(uint8(b) / 16);
             bytes1 lo = bytes1(uint8(b) - 16 * uint8(hi));
             s[2 * i] = char(hi);
@@ -541,4 +477,101 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
         if (uint8(b) < 10) return bytes1(uint8(b) + 0x30);
         else return bytes1(uint8(b) + 0x57);
     }
+
+    function getPartOne(uint256 _projectId, string memory projectName) internal view returns (bytes memory)  {
+         // Theme
+        Theme memory theme = themes[_projectId].customTheme == true
+            ? themes[_projectId]
+            : themes[0];
+        
+        return abi.encodePacked(
+            abi.encodePacked(
+                '<svg width="289" height="403" viewBox="0 0 289 403" xmlns="http://www.w3.org/2000/svg"><style>@font-face{font-family:"Capsules-500";src:url(data:font/truetype;charset=utf-8;base64,',
+                getFontSource(), // import Capsules typeface
+                ');format("opentype");}a,a:visited,a:hover{fill:inherit;text-decoration:none;}text{font-size:16px;fill:#',
+                theme.textColor.toString(),
+                ';font-family:"Capsules-500",monospace;font-weight:500;white-space:pre;}#head text{fill:#',
+                theme.bgColor.toString(),
+                ';}</style><g clip-path="url(#clip0)"><path d="M289 0H0V403H289V0Z" fill="url(#paint0)"/><rect width="289" height="22" fill="#',
+                theme.textColor.toString()
+            ),
+            '"/><g id="head"><a href="https://juicebox.money/v2/p/',
+            _projectId.toString(),
+            '">', // Line 0: Head
+            '<text x="16" y="16">',
+            projectName,
+            '</text></a><a href="https://juicebox.money"><text x="259.25" y="16">',
+            unicode"",
+            "</text></a></g>"
+        );
+    }
+
+    function getPartTwo(bytes memory _base, uint256 _projectId, IJBPaymentTerminal _primaryEthPaymentTerminal, string memory _projectOwnerPaddedRight, address owner) internal view returns (bytes memory)  {
+        JBFundingCycle memory fundingCycle = fundingCycleStore.currentOf(
+            _projectId
+        );
+
+        return abi.encodePacked(
+                abi.encodePacked(
+                _base,
+                // Line 1: FC + Time left
+                '<g filter="url(#filter1)"><text x="0" y="48">',
+                getFCTimeLeftRow(fundingCycle),
+                "</text>",
+                // Line 2: Spacer
+                '<text x="0" y="64">',
+                unicode"                              ",
+                "</text>",
+                // Line 3: Balance
+                '<text x="0" y="80">',
+                getBalanceRow(_primaryEthPaymentTerminal, _projectId),
+                "</text>",
+                // Line 4: Overflow
+                '<text x="0" y="96">',
+                getOverflowRow(getOverflowString(_projectId)),
+                "</text>"
+            ),
+            // Line 5: Distribution Limit
+            '<text x="0" y="112">',
+            getDistributionLimitRow(_primaryEthPaymentTerminal, _projectId),
+            "</text>",
+            // Line 6: Total Supply
+            '<text x="0" y="128">',
+            getTotalSupplyRow(_projectId),
+            "</text>",
+            // Line 7: Project Owner
+            '<text x="0" y="144">',
+            _projectOwnerPaddedRight,
+            "  ", // additional spaces hard coded for this line, presumes address is 11 chars long
+            '<a href="https://etherscan.io/address/',
+            toAsciiString(owner),
+            '">',
+            getOwnerName(owner),
+            "</a>"
+        );
+    }
+
+    function getPartThree(bytes memory _base, uint256 _projectId) internal view returns (bytes memory) {
+         // Theme
+        Theme memory theme = themes[_projectId].customTheme == true
+            ? themes[_projectId]
+            : themes[0];
+
+        return abi.encodePacked(abi.encodePacked(
+                _base,
+                '</text></g></g><defs><filter id="filter1" x="-3.36" y="26.04" width="294.539" height="126.12" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feMorphology operator="dilate" radius="0.1" in="SourceAlpha" result="thicken"/><feGaussianBlur in="thicken" stdDeviation="0.5" result="blurred"/><feFlood flood-color="#',
+                theme.textColor.toString(),
+                '" result="glowColor"/><feComposite in="glowColor" in2="blurred" operator="in" result="softGlow_colored"/><feMerge><feMergeNode in="softGlow_colored"/><feMergeNode in="SourceGraphic"/></feMerge></filter><linearGradient id="paint0" x1="0" y1="202" x2="289" y2="202" gradientUnits="userSpaceOnUse"><stop stop-color="#',
+                theme.bgColorDark.toString(),
+                '"/><stop offset="0.119792" stop-color="#'
+            ),
+            theme.bgColor.toString(),
+            '"/><stop offset="0.848958" stop-color="#',
+            theme.bgColor.toString(),
+            '"/><stop offset="1" stop-color="#',
+            theme.bgColorDark.toString(),
+            '"/></linearGradient><clipPath id="clip0"><rect width="289" height="403" /></clipPath></defs></svg>'
+        );
+    }
 }
+
