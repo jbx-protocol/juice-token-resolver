@@ -21,23 +21,11 @@ import {Base64} from "base64-sol/base64.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {Font, ITypeface} from "typeface/interfaces/ITypeface.sol";
 import "solcolor/src/Color.sol";
-
-contract StringSlicer {
-    // This function is in a separate contract so that TokenUriResolver can pass it a string memory and we can still use Array Slices (which only work on calldata)
-    function slice(
-        string calldata _str,
-        uint256 _start,
-        uint256 _end
-    ) external pure returns (string memory) {
-        return string(bytes(_str)[_start:_end]);
-    }
-}
+import {StringSlicer} from "./Libraries/StringSlicer.sol";
 
 contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
     using Strings for uint256;
     using LibColor for Color;
-
-    StringSlicer slice = new StringSlicer();
 
     event Log(string message);
     event ThemeSet(
@@ -108,7 +96,7 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
         bool left,
         string memory str,
         uint256 targetLength
-    ) internal view returns (string memory) {
+    ) internal pure returns (string memory) {
         uint256 length = bytes(str).length;
 
         // If string is already target length, return it
@@ -119,7 +107,7 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
         // If string is longer than target length, abbreviate it and add an ellipsis
         if (length > targetLength) {
             str = string.concat(
-                slice.slice(str, 0, targetLength - 1), // Abbreviate to 1 character less than target length
+                StringSlicer.slice(str, 0, targetLength - 1), // Abbreviate to 1 character less than target length
                 unicode"…"
             ); // And add an ellipsis
             return str;
@@ -138,11 +126,9 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
         return str;
     }
 
-    function getProjectName(uint256 _projectId)
-        internal
-        view
-        returns (string memory projectName)
-    {
+    function getProjectName(
+        uint256 _projectId
+    ) internal view returns (string memory projectName) {
         // Project Handle
         string memory _projectName;
         // If handle is set
@@ -162,28 +148,24 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
         // Abbreviate handle to 27 chars if longer
         if (bytes(_projectName).length > 26) {
             _projectName = string.concat(
-                slice.slice(_projectName, 0, 26),
+                StringSlicer.slice(_projectName, 0, 26),
                 unicode"…"
             );
         }
         return _projectName;
     }
 
-    function getOverflowString(uint256 _projectId)
-        internal
-        view
-        returns (string memory overflowString)
-    {
+    function getOverflowString(
+        uint256 _projectId
+    ) internal view returns (string memory overflowString) {
         uint256 overflow = singleTokenPaymentTerminalStore
             .currentTotalOverflowOf(_projectId, 0, 1); // Project's overflow to 0 decimals
         return string.concat(unicode"Ξ", overflow.toString());
     }
 
-    function getOverflowRow(string memory overflowString)
-        internal
-        view
-        returns (string memory overflowRow)
-    {
+    function getOverflowRow(
+        string memory overflowString
+    ) internal pure returns (string memory overflowRow) {
         string memory paddedOverflowLeft = string.concat(
             pad(true, overflowString, 14),
             "  "
@@ -194,22 +176,18 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
         return string.concat(paddedOverflowRight, paddedOverflowLeft);
     }
 
-    function getRightPaddedFC(JBFundingCycle memory _fundingCycle)
-        internal
-        view
-        returns (string memory rightPaddedFCString)
-    {
+    function getRightPaddedFC(
+        JBFundingCycle memory _fundingCycle
+    ) internal pure returns (string memory rightPaddedFCString) {
         uint256 currentFundingCycleId = _fundingCycle.number; // Project's current funding cycle id
         string memory fundingCycleIdString = currentFundingCycleId.toString();
         return
             pad(false, string.concat(unicode"  ꜰc ", fundingCycleIdString), 17);
     }
 
-    function getLeftPaddedTimeLeft(JBFundingCycle memory _fundingCycle)
-        internal
-        view
-        returns (string memory leftPaddedTimeLeftString)
-    {
+    function getLeftPaddedTimeLeft(
+        JBFundingCycle memory _fundingCycle
+    ) internal view returns (string memory leftPaddedTimeLeftString) {
         // Time Left
         uint256 start = _fundingCycle.start; // Project's funding cycle start time
         uint256 duration = _fundingCycle.duration; // Project's current funding cycle duration
@@ -288,11 +266,9 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
         return paddedTimeLeft;
     }
 
-    function getFCTimeLeftRow(JBFundingCycle memory fundingCycle)
-        internal
-        view
-        returns (string memory fCTimeLeftRow)
-    {
+    function getFCTimeLeftRow(
+        JBFundingCycle memory fundingCycle
+    ) internal view returns (string memory fCTimeLeftRow) {
         return
             string.concat(
                 getRightPaddedFC(fundingCycle),
@@ -308,7 +284,7 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
         uint256 balance = singleTokenPaymentTerminalStore.balanceOf(
             IJBSingleTokenPaymentTerminal(address(primaryEthPaymentTerminal)),
             _projectId
-        ) / 10**18; // Project's ETH balance //TODO Try/catch
+        ) / 10 ** 18; // Project's ETH balance //TODO Try/catch
         string memory paddedBalanceLeft = string.concat(
             pad(true, string.concat(unicode"Ξ", balance.toString()), 14),
             "  "
@@ -346,7 +322,7 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
         }
         string memory distributionLimit = string.concat(
             distributionLimitCurrency,
-            (distributionLimitPreprocessed / 10**18).toString()
+            (distributionLimitPreprocessed / 10 ** 18).toString()
         ); // Project's distribution limit
         string memory paddedDistributionLimitLeft = string.concat(
             pad(
@@ -366,13 +342,11 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
             );
     }
 
-    function getTotalSupplyRow(uint256 _projectId)
-        internal
-        view
-        returns (string memory totalSupplyRow)
-    {
+    function getTotalSupplyRow(
+        uint256 _projectId
+    ) internal view returns (string memory totalSupplyRow) {
         // Supply
-        uint256 totalSupply = tokenStore.totalSupplyOf(_projectId) / 10**18; // Project's token total supply
+        uint256 totalSupply = tokenStore.totalSupplyOf(_projectId) / 10 ** 18; // Project's token total supply
         string memory paddedTotalSupplyLeft = string.concat(
             pad(true, totalSupply.toString(), 13),
             "  "
@@ -405,17 +379,15 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
         emit ThemeSet(_projectId, textColor, bgColor, bgColorDark);
     }
 
-    function getOwnerName(address owner)
-        internal
-        view
-        returns (string memory ownerName)
-    {
+    function getOwnerName(
+        address owner
+    ) internal pure returns (string memory ownerName) {
         return
             string.concat(
                 "0x",
-                slice.slice(toAsciiString(owner), 0, 4),
+                StringSlicer.slice(toAsciiString(owner), 0, 4),
                 unicode"…",
-                slice.slice(toAsciiString(owner), 36, 40)
+                StringSlicer.slice(toAsciiString(owner), 36, 40)
             ); // Abbreviate owner address
     }
 
@@ -602,3 +574,4 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
         );
     }
 }
+
