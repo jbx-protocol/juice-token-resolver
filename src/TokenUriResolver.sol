@@ -125,4 +125,13 @@ contract TokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
 
         emit DefaultTokenUriResolverSet(_resolver);
     }
+
+   /**
+     * @notice Get the default IJBTokenUriResolver address.
+     * @dev Convenience function for browsing contracts on block explorers.
+     * @return IJBTokenURiResolver The address of the default token uri resolver.
+     */
+    function defaultTokenUriResolver() external view returns (IJBTokenUriResolver){
+        return tokenUriResolvers[0];
+    }
 }
