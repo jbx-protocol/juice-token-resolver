@@ -490,7 +490,7 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
         return
             abi.encodePacked(
                 abi.encodePacked(
-                    '<svg width="289" height="403" viewBox="0 0 289 403" xmlns="http://www.w3.org/2000/svg"><style>@font-face{font-family:"Capsules-500";src:url(data:font/truetype;charset=utf-8;base64,',
+                    '<svg width="289" height="164" viewBox="0 0 289 164" xmlns="http://www.w3.org/2000/svg"><style>@font-face{font-family:"Capsules-500";src:url(data:font/truetype;charset=utf-8;base64,',
                     getFontSource(), // import Capsules typeface
                     ');format("opentype");}a,a:visited,a:hover{fill:inherit;text-decoration:none;}text{font-size:16px;fill:#',
                     theme.textColor.toString(),
@@ -586,7 +586,7 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
                 theme.bgColor.toString(),
                 '"/><stop offset="1" stop-color="#',
                 theme.bgColorDark.toString(),
-                '"/></linearGradient><clipPath id="clip0"><rect width="289" height="403" /></clipPath></defs></svg>'
+                '"/></linearGradient><clipPath id="clip0"><rect width="289" height="164" /></clipPath></defs></svg>'
             );
     }
 }
