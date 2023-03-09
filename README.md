@@ -34,13 +34,23 @@ Run `forge test --fork-url $ETH_RPC_URL -v --via-ir --ffi --match-test Get`
 Note: Update `foundry.toml`'s `solc` reference as needed.
 
 ### Goerli
+Run the following commands sequentially. You'll need to replace values marked with `$` and `<DEPLOYED_ADDRESS>`, and update the `constructor-args` files with addresses that correspond to your deployment — specifically the last constructor arg for both DefaultTokenUriResolver and TokenUriResolver.
+
+#### StringSlicer
+`forge create --rpc-url $GOERLI_RPC_URL --private-key $GOERLI_PRIV_KEY --etherscan-api-key $ETHERSCAN_API_KEY --verify src/Libraries/StringSlicer.sol:StringSlicer`
+
+#### LibColor
+`forge create --rpc-url $GOERLI_RPC_URL --private-key $GOERLI_PRIV_KEY --etherscan-api-key $ETHERSCAN_API_KEY --verify lib/solcolor/src/Color.sol:LibColor`
+
 #### DefaultTokenUriResolver
-`forge create --rpc-url $GOERLI_RPC_URL --constructor-args-path constructor-args/DefaultTokenUriResolver/goerli_constructor_args --private-key $GOERLI_PRIV_KEY --etherscan-api-key $ETHERSCAN_API_KEY --via-ir --verify src/DefaultTokenUriResolver.sol:DefaultTokenUriResolver`
+Update `foundry.toml`'s `libraries` key with the deployment addresses returned when you deployed StringSlicer and LibColor in the last two steps.
+
+`forge create --rpc-url $GOERLI_RPC_URL --constructor-args-path constructor-args/DefaultTokenUriResolver/goerli_constructor_args --libraries src/Libraries/StringSlicer.sol:StringSlicer:<DEPLOYED_ADDRESS> --private-key $GOERLI_PRIV_KEY --etherscan-api-key $ETHERSCAN_API_KEY --verify src/DefaultTokenUriResolver.sol:DefaultTokenUriResolver`
 
 #### TokenUriResolver (untested)
 Update the third address in `/constructor-args/tokenUriResolver/goerli_constructor_args` to the DefaultTokenUriResolver deployed in the previous step.
 
-`forge create --rpc-url $GOERLI_RPC_URL --constructor-args-path constructor-args/TokenUriResolver/goerli_constructor_args --private-key $GOERLI_PRIV_KEY --etherscan-api-key $ETHERSCAN_API_KEY --via-ir --verify src/TokenUriResolver.sol:TokenUriResolver`
+`forge create --rpc-url $GOERLI_RPC_URL --constructor-args-path constructor-args/TokenUriResolver/goerli_constructor_args --private-key $GOERLI_PRIV_KEY --etherscan-api-key $ETHERSCAN_API_KEY --verify src/TokenUriResolver.sol:TokenUriResolver`
 
 ## Example output
 
