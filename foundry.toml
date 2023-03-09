@@ -3,6 +3,5 @@ src = 'src'
 out = 'out'
 libs = ['lib', 'node_modules']
 solc = '0.8.17'
-libraries = ["src/Libraries/StringSlicer.sol:StringSlicer:0x82bc76262e54d5f0de1f0c632d169f60042738b9", "lib/solcolor/src/Color.sol:LibColor:0xc483014cbae9f4652b40cfabbbd4e9017b9d7ab9"]
 
 # See more config options https://github.com/foundry-rs/foundry/tree/master/config
