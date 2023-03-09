@@ -490,7 +490,7 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
         return
             abi.encodePacked(
                 abi.encodePacked(
-                    '<svg width="289" height="164" viewBox="0 0 289 164" xmlns="http://www.w3.org/2000/svg"><style>@font-face{font-family:"Capsules-500";src:url(data:font/truetype;charset=utf-8;base64,',
+                    '<svg width="350" height="201.038062284" viewBox="0 0 350 201.038062284" xmlns="http://www.w3.org/2000/svg"><style>@font-face{font-family:"Capsules-500";src:url(data:font/truetype;charset=utf-8;base64,',
                     getFontSource(), // import Capsules typeface
                     ');format("opentype");}a,a:visited,a:hover{fill:inherit;text-decoration:none;}text{font-size:16px;fill:#',
                     theme.textColor.toString(),
@@ -575,7 +575,7 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
             abi.encodePacked(
                 abi.encodePacked(
                     _base,
-                    '</text></g></g><defs><filter id="filter1" x="-3.36" y="26.04" width="294.539" height="126.12" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feMorphology operator="dilate" radius="0.1" in="SourceAlpha" result="thicken"/><feGaussianBlur in="thicken" stdDeviation="0.5" result="blurred"/><feFlood flood-color="#',
+                    '</text></g></g><defs><filter id="filter1" x="-3.36" y="26.04" width="350" height="201.038062284" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feMorphology operator="dilate" radius="0.1" in="SourceAlpha" result="thicken"/><feGaussianBlur in="thicken" stdDeviation="0.5" result="blurred"/><feFlood flood-color="#',
                     theme.textColor.toString(),
                     '" result="glowColor"/><feComposite in="glowColor" in2="blurred" operator="in" result="softGlow_colored"/><feMerge><feMergeNode in="softGlow_colored"/><feMergeNode in="SourceGraphic"/></feMerge></filter><linearGradient id="paint0" x1="0" y1="202" x2="289" y2="202" gradientUnits="userSpaceOnUse"><stop stop-color="#',
                     theme.bgColorDark.toString(),
@@ -586,7 +586,7 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
                 theme.bgColor.toString(),
                 '"/><stop offset="1" stop-color="#',
                 theme.bgColorDark.toString(),
-                '"/></linearGradient><clipPath id="clip0"><rect width="289" height="164" /></clipPath></defs></svg>'
+                '"/></linearGradient><clipPath id="clip0"><rect width="350" height="201.038062284" /></clipPath></defs></svg>'
             );
     }
 }
