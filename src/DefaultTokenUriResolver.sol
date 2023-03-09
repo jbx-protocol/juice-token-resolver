@@ -420,7 +420,7 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
                     '", "description":"',
                     projectName,
                     " is a project on the Juicebox Protocol. It has an overflow of ",
-                    // getOverflowString(_projectId),
+                    getOverflowString(_projectId),
                     ' ETH.", "image":"data:image/svg+xml;base64,'
                 )
             );
