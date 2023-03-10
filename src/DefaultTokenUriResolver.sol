@@ -443,6 +443,12 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
         return string(abi.encodePacked(unicode"Ξ", balance.toString()));
     }
 
+    function getTotalSupply(
+        uint256 _projectId
+    ) internal view returns (string memory) {
+        return (tokenStore.totalSupplyOf(_projectId) / 10 ** 18).toString();
+    }
+
     function getUri(
         uint256 _projectId
     ) external view override returns (string memory tokenUri) {
@@ -455,29 +461,10 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
             IJBPaymentTerminal primaryEthPaymentTerminal = directory
                 .primaryTerminalOf(_projectId, JBTokens.ETH);
 
-            parts[0] = string(
-                abi.encodePacked(
-                    '{"name":"',
-                    projectName,
-                    '", "description":"',
-                    projectName,
-                    ' is a project on the Juicebox Protocol.",',
-                    '"attributes":[',
-                    '{"display_type":"number","trait_type":"Balance","value":"',
-                    getBalance(_projectId, primaryEthPaymentTerminal),
-                    '"},',
-                    '{"display_type":"number","trait_type":"Overflow","value":"',
-                    getOverflowString(_projectId),
-                    '"},',
-                    '{"display_type":"number","trait_type":"Distribution Limit","value":"',
-                    getDistributionLimit(primaryEthPaymentTerminal, _projectId),
-                    '"},',
-                    '{"display_type":"number","trait_type":"Total Supply","value":"',
-                    (tokenStore.totalSupplyOf(_projectId) / 10 ** 18)
-                        .toString(),
-                    '"}],',
-                    '"image":"data:image/svg+xml;base64,'
-                )
+            parts[0] = getPartZero(
+                _projectId,
+                projectName,
+                primaryEthPaymentTerminal
             );
 
             // Owner
@@ -501,8 +488,6 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
                 )
             );
         }
-
-        // parts[3] = string('"}'); // Close the JSON object
         string memory uri = string.concat(
             string("data:application/json;base64,"),
             Base64.encode(abi.encodePacked(parts[0], parts[1], string('"}')))
@@ -531,6 +516,37 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
     function char(bytes1 b) internal pure returns (bytes1 c) {
         if (uint8(b) < 10) return bytes1(uint8(b) + 0x30);
         else return bytes1(uint8(b) + 0x57);
+    }
+
+    function getPartZero(
+        uint256 _projectId,
+        string memory projectName,
+        IJBPaymentTerminal primaryEthPaymentTerminal
+    ) internal view returns (string memory) {
+        return
+            string(
+                abi.encodePacked(
+                    '{"name":"',
+                    projectName,
+                    '", "description":"',
+                    projectName,
+                    ' is a project on the Juicebox Protocol.",',
+                    '"attributes":[',
+                    '{"display_type":"number","trait_type":"Balance","value":"',
+                    getBalance(_projectId, primaryEthPaymentTerminal),
+                    '"},',
+                    '{"display_type":"number","trait_type":"Overflow","value":"',
+                    getOverflowString(_projectId),
+                    '"},',
+                    '{"display_type":"number","trait_type":"Distribution Limit","value":"',
+                    getDistributionLimit(primaryEthPaymentTerminal, _projectId),
+                    '"},',
+                    '{"display_type":"number","trait_type":"Total Supply","value":"',
+                    getTotalSupply(_projectId),
+                    '"}],',
+                    '"image":"data:image/svg+xml;base64,'
+                )
+            );
     }
 
     function getPartOne(
