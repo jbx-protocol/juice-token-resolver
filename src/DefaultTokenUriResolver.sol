@@ -307,6 +307,37 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
         return string.concat(paddedBalanceRight, paddedBalanceLeft);
     }
 
+    function getDistributionLimit(
+        IJBPaymentTerminal primaryEthPaymentTerminal,
+        uint256 _projectId
+    ) internal view returns (string memory distributionLimit) {
+        // Distribution Limit
+        uint256 latestConfiguration = fundingCycleStore.latestConfigurationOf(
+            _projectId
+        ); // Get project's current FC  configuration
+        (
+            uint256 distributionLimitPreprocessed,
+            uint256 distributionLimitCurrencyPreprocessed
+        ) = controller.distributionLimitOf(
+                _projectId,
+                latestConfiguration,
+                primaryEthPaymentTerminal,
+                JBTokens.ETH
+            ); // Project's distribution limit
+        string memory distributionLimitCurrency;
+        if (distributionLimitCurrencyPreprocessed == 1) {
+            distributionLimitCurrency = unicode"Ξ";
+        } else {
+            distributionLimitCurrency = "$";
+        }
+        return (
+            string.concat(
+                distributionLimitCurrency,
+                (distributionLimitPreprocessed / 10 ** 18).toString()
+            )
+        ); // Project's distribution limit
+    }
+
     function getDistributionLimitRow(
         IJBPaymentTerminal primaryEthPaymentTerminal,
         uint256 _projectId
@@ -408,7 +439,7 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
         uint256 balance = getTerminalStore(_projectId).balanceOf(
             IJBSingleTokenPaymentTerminal(address(primaryEthPaymentTerminal)),
             _projectId
-        );
+        ) / 10 ** 18;
         return string(abi.encodePacked(unicode"Ξ", balance.toString()));
     }
 
@@ -430,12 +461,20 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
                     projectName,
                     '", "description":"',
                     projectName,
-                    ' is a project on the Juicebox Protocol. It has an overflow of ',
-                    getOverflowString(_projectId),
-                    ' ETH.", ',
+                    ' is a project on the Juicebox Protocol.",',
                     '"attributes":[',
                     '{"display_type":"number","trait_type":"Balance","value":"',
                     getBalance(_projectId, primaryEthPaymentTerminal),
+                    '"},',
+                    '{"display_type":"number","trait_type":"Overflow","value":"',
+                    getOverflowString(_projectId),
+                    '"},',
+                    '{"display_type":"number","trait_type":"Distribution Limit","value":"',
+                    getDistributionLimit(primaryEthPaymentTerminal, _projectId),
+                    '"},',
+                    '{"display_type":"number","trait_type":"Total Supply","value":"',
+                    (tokenStore.totalSupplyOf(_projectId) / 10 ** 18)
+                        .toString(),
                     '"}],',
                     '"image":"data:image/svg+xml;base64,'
                 )
