@@ -461,11 +461,13 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
             IJBPaymentTerminal primaryEthPaymentTerminal = directory
                 .primaryTerminalOf(_projectId, JBTokens.ETH);
 
-            parts[0] = getPartZero(
-                _projectId,
-                projectName,
-                primaryEthPaymentTerminal
-            );
+            {
+                parts[0] = getPartZero(
+                    _projectId,
+                    projectName,
+                    primaryEthPaymentTerminal
+                );
+            }
 
             // Owner
             address owner = projects.ownerOf(_projectId); // Project's owner
@@ -536,15 +538,20 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
                     getBalance(_projectId, primaryEthPaymentTerminal),
                     '"},',
                     '{"display_type":"number","trait_type":"Overflow","value":"',
-                    getOverflowString(_projectId),
-                    '"},',
-                    '{"display_type":"number","trait_type":"Distribution Limit","value":"',
-                    getDistributionLimit(primaryEthPaymentTerminal, _projectId),
-                    '"},',
-                    '{"display_type":"number","trait_type":"Total Supply","value":"',
-                    getTotalSupply(_projectId),
-                    '"}],',
-                    '"image":"data:image/svg+xml;base64,'
+                    abi.encodePacked(
+                        getOverflowString(_projectId),
+                        '"},',
+                        '{"display_type":"number","trait_type":"Distribution Limit","value":"',
+                        getDistributionLimit(
+                            primaryEthPaymentTerminal,
+                            _projectId
+                        ),
+                        '"},',
+                        '{"display_type":"number","trait_type":"Total Supply","value":"',
+                        getTotalSupply(_projectId),
+                        '"}],',
+                        '"image":"data:image/svg+xml;base64,'
+                    )
                 )
             );
     }
