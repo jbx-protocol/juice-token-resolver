@@ -20,7 +20,7 @@ import {Theme} from "./Structs/Theme.sol";
 import {Base64} from "base64-sol/base64.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {Font, ITypeface} from "typeface/interfaces/ITypeface.sol";
-import "solcolor/src/Color.sol";
+import {LibColor, Color, newColorFromRGBString} from "solcolor/src/Color.sol";
 import {StringSlicer} from "./Libraries/StringSlicer.sol";
 
 contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
@@ -401,6 +401,17 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
             ); // Abbreviate owner address
     }
 
+    function getBalance(
+        uint256 _projectId,
+        IJBPaymentTerminal primaryEthPaymentTerminal
+    ) internal view returns (string memory) {
+        uint256 balance = getTerminalStore(_projectId).balanceOf(
+            IJBSingleTokenPaymentTerminal(address(primaryEthPaymentTerminal)),
+            _projectId
+        );
+        return string(abi.encodePacked(unicode"Ξ", balance.toString()));
+    }
+
     function getUri(
         uint256 _projectId
     ) external view override returns (string memory tokenUri) {
@@ -419,9 +430,14 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
                     projectName,
                     '", "description":"',
                     projectName,
-                    " is a project on the Juicebox Protocol. It has an overflow of ",
+                    ' is a project on the Juicebox Protocol. It has an overflow of ',
                     getOverflowString(_projectId),
-                    ' ETH.", "image":"data:image/svg+xml;base64,'
+                    ' ETH.", ',
+                    '"attributes":[',
+                    '{"display_type":"number","trait_type":"Balance","value":"',
+                    getBalance(_projectId, primaryEthPaymentTerminal),
+                    '"}],',
+                    '"image":"data:image/svg+xml;base64,'
                 )
             );
 
@@ -490,13 +506,13 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
         return
             abi.encodePacked(
                 abi.encodePacked(
-                    '<svg width="350" height="201.038062284" viewBox="0 0 350 201.038062284" xmlns="http://www.w3.org/2000/svg"><style>@font-face{font-family:"Capsules-500";src:url(data:font/truetype;charset=utf-8;base64,',
+                    '<svg width="289" height="160" viewBox="0 0 289 160" xmlns="http://www.w3.org/2000/svg"><style>@font-face{font-family:"Capsules-500";src:url(data:font/truetype;charset=utf-8;base64,',
                     getFontSource(), // import Capsules typeface
                     ');format("opentype");}a,a:visited,a:hover{fill:inherit;text-decoration:none;}text{font-size:16px;fill:#',
                     theme.textColor.toString(),
                     ';font-family:"Capsules-500",monospace;font-weight:500;white-space:pre;}#head text{fill:#',
                     theme.bgColor.toString(),
-                    ';}</style><g clip-path="url(#clip0)"><path d="M289 0H0V403H289V0Z" fill="url(#paint0)"/><rect width="289" height="22" fill="#',
+                    ';}</style><g clip-path="url(#clip0)"><path d="M289 0H0V160H289V0Z" fill="url(#paint0)"/><rect width="289" height="22" fill="#',
                     theme.textColor.toString()
                 ),
                 '"/><g id="head"><a href="https://juicebox.money/v2/p/',
@@ -575,7 +591,7 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
             abi.encodePacked(
                 abi.encodePacked(
                     _base,
-                    '</text></g></g><defs><filter id="filter1" x="-3.36" y="26.04" width="350" height="201.038062284" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feMorphology operator="dilate" radius="0.1" in="SourceAlpha" result="thicken"/><feGaussianBlur in="thicken" stdDeviation="0.5" result="blurred"/><feFlood flood-color="#',
+                    '</text></g></g><defs><filter id="filter1" x="-3.36" y="26.04" width="298" height="160" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feMorphology operator="dilate" radius="0.1" in="SourceAlpha" result="thicken"/><feGaussianBlur in="thicken" stdDeviation="0.5" result="blurred"/><feFlood flood-color="#',
                     theme.textColor.toString(),
                     '" result="glowColor"/><feComposite in="glowColor" in2="blurred" operator="in" result="softGlow_colored"/><feMerge><feMergeNode in="softGlow_colored"/><feMergeNode in="SourceGraphic"/></feMerge></filter><linearGradient id="paint0" x1="0" y1="202" x2="289" y2="202" gradientUnits="userSpaceOnUse"><stop stop-color="#',
                     theme.bgColorDark.toString(),
@@ -586,7 +602,7 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
                 theme.bgColor.toString(),
                 '"/><stop offset="1" stop-color="#',
                 theme.bgColorDark.toString(),
-                '"/></linearGradient><clipPath id="clip0"><rect width="350" height="201.038062284" /></clipPath></defs></svg>'
+                '"/></linearGradient><clipPath id="clip0"><rect width="289" height="160" /></clipPath></defs></svg>'
             );
     }
 }
