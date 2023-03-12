@@ -29,10 +29,6 @@ contract ContractTest is Test {
         IJBProjectHandles(0xE3c01E9Fd2a1dCC6edF0b1058B5757138EF9FfB6);
     ITypeface public capsulesTypeface =
         ITypeface(0xA77b7D93E79f1E6B4f77FaB29d9ef85733A3D44A);
-    // IReverseRegistrar public reverseRegistrar =
-    //     IReverseRegistrar(0x084b1c3C81545d370f3634392De611CaaBFf8148);
-    // IResolver public resolver =
-    //     IResolver(0xA2C122BE93b0074270ebeE7f6b7292C7deB45047);
 
     DefaultTokenUriResolver d =
         new DefaultTokenUriResolver(
@@ -40,34 +36,5 @@ contract ContractTest is Test {
             directory,
             projectHandles,
             capsulesTypeface
-            // , reverseRegistrar, resolver
         );
-
-    // function testGetUri() external {
-    //     string memory x = d.getUri(305); // 1, 311, 305, 308, 323
-    //     string[] memory inputs = new string[](3);
-    //     inputs[0] = "node";
-    //     inputs[1] = "./open.js";
-    //     inputs[2] = x;
-    //     // bytes memory res = vm.ffi(inputs);
-    //     vm.ffi(inputs);
-    // }
-
-    // function testSetTheme() external {
-    //     Theme memory customTheme = Theme({
-    //         projectId: 1,
-    //         textColor: "fff",
-    //         bgColor: "000",
-    //         bgColorDark: "000"
-    //     });
-    //     vm.prank(0xAF28bcB48C40dBC86f52D459A6562F658fc94B1e);
-    //     d.setTheme(customTheme);
-    //     string memory x = d.getUri(1); // 1, 311, 305, 308, 323
-    //     string[] memory inputs = new string[](3);
-    //     inputs[0] = "node";
-    //     inputs[1] = "./open.js";
-    //     inputs[2] = x;
-    //     // bytes memory res = vm.ffi(inputs);
-    //     vm.ffi(inputs);
-    // }
 }

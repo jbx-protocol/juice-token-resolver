@@ -251,6 +251,12 @@ contract ContractTest is Test {
                      DEFAULTTOKENURIRESOLVER TESTS
     //////////////////////////////////////////////////////////////*/
 
+    function testRevert_when_non_owner_sets_theme() external {
+        uint256 projectId = 1; 
+        vm.expectRevert(JBOperatable.UNAUTHORIZED.selector);
+        d.setTheme(projectId, "FFFFFF", "FFFAAA", "FFFAAA");
+    }
+
     // Tests that project owners can set themes on the default resolver and they render correctly when called from the tokenUriResolver.
     function testSetTheme() external {
         uint256 projectId = 1; 
