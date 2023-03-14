@@ -168,7 +168,11 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
         uint256 currentFundingCycleId = _fundingCycle.number; // Project's current funding cycle id
         string memory fundingCycleIdString = currentFundingCycleId.toString();
         return
-            pad(false, string.concat(unicode"  cʏcʟᴇ ", fundingCycleIdString), 19);
+            pad(
+                false,
+                string.concat(unicode"  cʏcʟᴇ ", fundingCycleIdString),
+                19
+            );
     }
 
     function getLeftPaddedTimeLeft(
@@ -283,75 +287,69 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
         return string.concat(paddedBalanceRight, paddedBalanceLeft);
     }
 
-    function getDistributionLimit(
+    function getPayouts(
         IJBPaymentTerminal primaryEthPaymentTerminal,
         uint256 _projectId
-    ) internal view returns (string memory distributionLimit) {
-        // Distribution Limit
+    ) internal view returns (string memory payouts) {
+        // Payouts
         uint256 latestConfiguration = fundingCycleStore.latestConfigurationOf(
             _projectId
         ); // Get project's current Cycle configuration
         (
-            uint256 distributionLimitPreprocessed,
-            uint256 distributionLimitCurrencyPreprocessed
+            uint256 payoutsPreprocessed,
+            uint256 payoutsCurrencyPreprocessed
         ) = controller.distributionLimitOf(
                 _projectId,
                 latestConfiguration,
                 primaryEthPaymentTerminal,
                 JBTokens.ETH
-            ); // Project's distribution limit
-        string memory distributionLimitCurrency;
-        if (distributionLimitCurrencyPreprocessed == 1) {
-            distributionLimitCurrency = unicode"Ξ";
-        } else {
-            distributionLimitCurrency = "$";
-        }
+            ); // Project's payouts currency
+        string memory payoutsCurrency;
+        payoutsCurrencyPreprocessed == 1
+            ? payoutsCurrency = unicode"Ξ"
+            : payoutsCurrency = "$";
+
         return (
             string.concat(
-                distributionLimitCurrency,
-                (distributionLimitPreprocessed / 10 ** 18).toString()
+                payoutsCurrency,
+                (payoutsPreprocessed / 10 ** 18).toString()
             )
-        ); // Project's distribution limit
+        ); // Project's payouts
     }
 
-    function getDistributionLimitRow(
+    function getPayoutsRow(
         IJBPaymentTerminal primaryEthPaymentTerminal,
         uint256 _projectId
-    ) internal view returns (string memory distributionLimitRow) {
-        // Distribution Limit
+    ) internal view returns (string memory payoutsRow) {
         uint256 latestConfiguration = fundingCycleStore.latestConfigurationOf(
             _projectId
         ); // Get project's current Cycle configuration
-        string memory distributionLimitCurrency;
+        string memory payoutsCurrency;
         (
-            uint256 distributionLimitPreprocessed,
-            uint256 distributionLimitCurrencyPreprocessed
+            uint256 payoutsPreprocessed,
+            uint256 payoutsCurrencyPreprocessed
         ) = controller.distributionLimitOf(
                 _projectId,
                 latestConfiguration,
                 primaryEthPaymentTerminal,
                 JBTokens.ETH
-            ); // Project's distribution limit
-        if (distributionLimitCurrencyPreprocessed == 1) {
-            distributionLimitCurrency = unicode"Ξ";
+            ); // Project's payouts and currency
+        if (payoutsCurrencyPreprocessed == 1) {
+            payoutsCurrency = unicode"Ξ";
         } else {
-            distributionLimitCurrency = "$";
+            payoutsCurrency = "$";
         }
-        string memory distributionLimit = string.concat(
-            distributionLimitCurrency,
-            (distributionLimitPreprocessed / 10 ** 18).toString()
-        ); // Project's distribution limit
+        string memory payouts = string.concat(
+            payoutsCurrency,
+            (payoutsPreprocessed / 10 ** 18).toString()
+        ); // Project's payouts
         string memory paddedDistributionLimitLeft = string.concat(
-            pad(
-                true,
-                distributionLimit,
-                12 + bytes(distributionLimitCurrency).length
-            ),
+            pad(true, payouts, 12 + bytes(payoutsCurrency).length),
             "  "
         );
         string memory paddedDistributionLimitRight = string.concat(
-            pad(false, unicode"  ᴅɪsᴛʀ. ʟɪᴍɪᴛ", 28)
-        ); // ᴅ = 3, ɪ = 2, T = 3, ʀ = 2, ʟ = 2, ɪ = 2, ᴍ = 3, ɪ = 2, T = 3
+            pad(false, unicode"  ᴘᴀʏouᴛs", 22)
+        );
         return
             string.concat(
                 paddedDistributionLimitRight,
@@ -449,7 +447,7 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
                     getBalance(_projectId, primaryEthPaymentTerminal),
                     '"},',
                     '{"display_type":"number","trait_type":"Payouts","value":"',
-                    getDistributionLimit(primaryEthPaymentTerminal, _projectId),
+                    getPayouts(primaryEthPaymentTerminal, _projectId),
                     '"},',
                     '{"display_type":"number","trait_type":"Token Supply","value":"',
                     getTokenSupply(_projectId),
@@ -571,9 +569,9 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
                     getBalanceRow(_primaryEthPaymentTerminal, _projectId),
                     "</text>"
                 ),
-                // Line 4: Distribution Limit
+                // Line 4: Payouts
                 '<text x="0" y="96">',
-                getDistributionLimitRow(_primaryEthPaymentTerminal, _projectId),
+                getPayoutsRow(_primaryEthPaymentTerminal, _projectId),
                 "</text>",
                 // Line 5: Token Supply
                 '<text x="0" y="112">',
