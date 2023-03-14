@@ -19,7 +19,7 @@ This repo relies on Mainnet forking for its tests. This approach allows tests to
 
 ### Run all tests
 
-Run `forge test --fork-url $ETH_RPC_URL -v --via-ir --ffi`, replacing `$ETH_RPC_URL` with your own RPC provider and API key. An RPC url might look like `https://mainnet.infura.io/v3/xyzabc123xyzabc123xyzabc123`.
+Run `forge test --fork-url $ETH_RPC_URL -v --ffi`, replacing `$ETH_RPC_URL` with your own RPC provider and API key. An RPC url might look like `https://mainnet.infura.io/v3/xyzabc123xyzabc123xyzabc123`.
 
 If you append `--fork-block-number BLOCK_NUMBER` to the above, replacing `BLOCK_NUMBER` with a recent block height, Forge will cache the fork and the tests will run faster. Do not be surprised if values don't change when you set a new project handle onchain.
 
@@ -27,7 +27,7 @@ If you append `--fork-block-number BLOCK_NUMBER` to the above, replacing `BLOCK_
 
 This test generates the default SVG to `src/onchain.svg`.
 
-Run `forge test --fork-url $ETH_RPC_URL -v --via-ir --ffi --match-test Get`
+Run `forge test --fork-url $ETH_RPC_URL -v --ffi --match-test Get`
 
 ## Deploying
 
