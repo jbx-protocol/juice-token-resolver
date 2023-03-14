@@ -162,13 +162,13 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
             );
     }
 
-    function getRightPaddedFC(
+    function getRightPaddedCycle(
         JBFundingCycle memory _fundingCycle
-    ) internal pure returns (string memory rightPaddedFCString) {
+    ) internal pure returns (string memory rightPaddedCycleString) {
         uint256 currentFundingCycleId = _fundingCycle.number; // Project's current funding cycle id
         string memory fundingCycleIdString = currentFundingCycleId.toString();
         return
-            pad(false, string.concat(unicode"  ꜰc ", fundingCycleIdString), 17);
+            pad(false, string.concat(unicode"  cʏcʟᴇ ", fundingCycleIdString), 19);
     }
 
     function getLeftPaddedTimeLeft(
@@ -252,12 +252,12 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
         return paddedTimeLeft;
     }
 
-    function getFCTimeLeftRow(
+    function getCycleTimeLeftRow(
         JBFundingCycle memory fundingCycle
-    ) internal view returns (string memory fCTimeLeftRow) {
+    ) internal view returns (string memory cycleTimeLeftRow) {
         return
             string.concat(
-                getRightPaddedFC(fundingCycle),
+                getRightPaddedCycle(fundingCycle),
                 getLeftPaddedTimeLeft(fundingCycle)
             );
     }
@@ -290,7 +290,7 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
         // Distribution Limit
         uint256 latestConfiguration = fundingCycleStore.latestConfigurationOf(
             _projectId
-        ); // Get project's current FC  configuration
+        ); // Get project's current Cycle configuration
         (
             uint256 distributionLimitPreprocessed,
             uint256 distributionLimitCurrencyPreprocessed
@@ -321,7 +321,7 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
         // Distribution Limit
         uint256 latestConfiguration = fundingCycleStore.latestConfigurationOf(
             _projectId
-        ); // Get project's current FC  configuration
+        ); // Get project's current Cycle configuration
         string memory distributionLimitCurrency;
         (
             uint256 distributionLimitPreprocessed,
@@ -558,9 +558,9 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
             abi.encodePacked(
                 abi.encodePacked(
                     _base,
-                    // Line 1: FC + Time left
+                    // Line 1: Cycle + Time left
                     '<g filter="url(#filter1)"><text x="0" y="48">',
-                    getFCTimeLeftRow(fundingCycle),
+                    getCycleTimeLeftRow(fundingCycle),
                     "</text>",
                     // Line 2: Spacer
                     '<text x="0" y="64">',
