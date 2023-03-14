@@ -162,30 +162,6 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
             );
     }
 
-    function getOverflowString(
-        uint256 _projectId
-    ) internal view returns (string memory overflowString) {
-        uint256 overflow = getTerminalStore(_projectId).currentTotalOverflowOf(
-            _projectId,
-            0,
-            1
-        ); // Project's overflow to 0 decimals
-        return string.concat(unicode"Ξ", overflow.toString());
-    }
-
-    function getOverflowRow(
-        string memory overflowString
-    ) internal pure returns (string memory overflowRow) {
-        string memory paddedOverflowLeft = string.concat(
-            pad(true, overflowString, 14),
-            "  "
-        ); // Length of 14 because Ξ counts as 2 characters, but has character width of 1
-        string memory paddedOverflowRight = string.concat(
-            pad(false, unicode"  ovᴇʀꜰʟow    ", 21)
-        ); //  E = 3, ʀ = 2, ꜰ = 3, ʟ = 2
-        return string.concat(paddedOverflowRight, paddedOverflowLeft);
-    }
-
     function getRightPaddedFC(
         JBFundingCycle memory _fundingCycle
     ) internal pure returns (string memory rightPaddedFCString) {
@@ -593,22 +569,18 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
                     // Line 3: Balance
                     '<text x="0" y="80">',
                     getBalanceRow(_primaryEthPaymentTerminal, _projectId),
-                    "</text>",
-                    // Line 4: Overflow
-                    '<text x="0" y="96">',
-                    getOverflowRow(getOverflowString(_projectId)),
                     "</text>"
                 ),
-                // Line 5: Distribution Limit
-                '<text x="0" y="112">',
+                // Line 4: Distribution Limit
+                '<text x="0" y="96">',
                 getDistributionLimitRow(_primaryEthPaymentTerminal, _projectId),
                 "</text>",
-                // Line 6: Total Supply
-                '<text x="0" y="128">',
+                // Line 5: Total Supply
+                '<text x="0" y="112">',
                 getTotalSupplyRow(_projectId),
                 "</text>",
-                // Line 7: Project Owner
-                '<text x="0" y="144">',
+                // Line 6: Project Owner
+                '<text x="0" y="128">',
                 _projectOwnerPaddedRight,
                 "  ", // additional spaces hard coded for this line, presumes address is 11 chars long
                 '<a href="https://etherscan.io/address/',
