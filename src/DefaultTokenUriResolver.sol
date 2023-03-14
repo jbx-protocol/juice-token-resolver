@@ -359,21 +359,21 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
             );
     }
 
-    function getTotalSupplyRow(
+    function getTokenSupplyRow(
         uint256 _projectId
-    ) internal view returns (string memory totalSupplyRow) {
+    ) internal view returns (string memory tokenSupplyRow) {
         // Supply
         uint256 totalSupply = tokenStore.totalSupplyOf(_projectId) / 10 ** 18; // Project's token total supply
-        string memory paddedTotalSupplyLeft = string.concat(
+        string memory paddedTokenSupplyLeft = string.concat(
             pad(true, totalSupply.toString(), 13),
             "  "
-        ); // Project's token total supply as a string
-        string memory paddedTotalSupplyRight = pad(
+        ); // Project's token token supply as a string
+        string memory paddedTokenSupplyRight = pad(
             false,
-            unicode"  ᴛoᴛᴀʟ suᴘᴘʟʏ",
+            unicode"  ᴛoᴋᴇɴ suᴘᴘʟʏ",
             28
         );
-        return string.concat(paddedTotalSupplyRight, paddedTotalSupplyLeft);
+        return string.concat(paddedTokenSupplyRight, paddedTokenSupplyLeft);
     }
 
     function setTheme(
@@ -419,7 +419,7 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
         return string(abi.encodePacked(unicode"Ξ", balance.toString()));
     }
 
-    function getTotalSupply(
+    function getTokenSupply(
         uint256 _projectId
     ) internal view returns (string memory) {
         return (tokenStore.totalSupplyOf(_projectId) / 10 ** 18).toString();
@@ -448,11 +448,11 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
                     '{"display_type":"number","trait_type":"Balance","value":"',
                     getBalance(_projectId, primaryEthPaymentTerminal),
                     '"},',
-                    '{"display_type":"number","trait_type":"Distribution Limit","value":"',
+                    '{"display_type":"number","trait_type":"Payouts","value":"',
                     getDistributionLimit(primaryEthPaymentTerminal, _projectId),
                     '"},',
-                    '{"display_type":"number","trait_type":"Total Supply","value":"',
-                    getTotalSupply(_projectId),
+                    '{"display_type":"number","trait_type":"Token Supply","value":"',
+                    getTokenSupply(_projectId),
                     '"}],',
                     '"image":"data:image/svg+xml;base64,'
                 )
@@ -575,9 +575,9 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
                 '<text x="0" y="96">',
                 getDistributionLimitRow(_primaryEthPaymentTerminal, _projectId),
                 "</text>",
-                // Line 5: Total Supply
+                // Line 5: Token Supply
                 '<text x="0" y="112">',
-                getTotalSupplyRow(_projectId),
+                getTokenSupplyRow(_projectId),
                 "</text>",
                 // Line 6: Project Owner
                 '<text x="0" y="128">',
