@@ -1,6 +1,7 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {IJBTokenUriResolver} from "@jbx-protocol/juice-contracts-v3/contracts/interfaces/IJBTokenUriResolver.sol";
 import {IJBToken, IJBTokenStore} from "@jbx-protocol/juice-contracts-v3/contracts/interfaces/IJBTokenStore.sol";
 import {JBFundingCycle} from "@jbx-protocol/juice-contracts-v3/contracts/structs/JBFundingCycle.sol";
@@ -23,7 +24,7 @@ import {Font, ITypeface} from "typeface/interfaces/ITypeface.sol";
 import {LibColor, Color, newColorFromRGBString} from "solcolor/src/Color.sol";
 import {StringSlicer} from "./Libraries/StringSlicer.sol";
 
-contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
+contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
     using Strings for uint256;
     using LibColor for Color;
 
@@ -58,12 +59,7 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
         tokenStore = controller.tokenStore();
         projectHandles = _projectHandles;
         capsulesTypeface = _capsulesTypeface;
-        themes[0] = Theme({
-            customTheme: false,
-            textColor: newColorFromRGBString("FF9213"),
-            bgColor: newColorFromRGBString("44190F"),
-            bgColorDark: newColorFromRGBString("3A0F0C")
-        });
+        setDefaultTheme("FF9213", "44190F", "3A0F0C");
     }
 
     // @notice Gets the Base64 encoded Capsules-500.otf typeface
@@ -392,6 +388,18 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable {
         Color bgColorDark = newColorFromRGBString(_bgColorDark);
         themes[_projectId] = Theme(true, textColor, bgColor, bgColorDark);
         emit ThemeSet(_projectId, textColor, bgColor, bgColorDark);
+    }
+
+    function setDefaultTheme(
+        string memory _textColor,
+        string memory _bgColor,
+        string memory _bgColorDark
+    ) public onlyOwner {
+        Color textColor = newColorFromRGBString(_textColor);
+        Color bgColor = newColorFromRGBString(_bgColor);
+        Color bgColorDark = newColorFromRGBString(_bgColorDark);
+        themes[0] = Theme(true, textColor, bgColor, bgColorDark);
+        emit ThemeSet(0, textColor, bgColor, bgColorDark);
     }
 
     function getOwnerName(
