@@ -56,6 +56,14 @@ Update the third address in `/constructor-args/tokenUriResolver/goerli_construct
 
 ![](src/onchain.svg)
 
+## Default Resolver
+
+Each row of the output SVG is 30 characters long. The Capsules typeface is monospaced, so as long as each row is composed of 30 characters, it will fit the image perfectly. Each row begins and ends with two space characters for visual symmetry. 
+
+Unicode and small cap characters are used to enhance aesthetics of the output SVG. These characters are sometimes composed of multiple bytes. For example, wile the character `L` [is one byte](https://mothereff.in/byte-counter#L), the small cap `ʟ` [is two bytes](https://mothereff.in/byte-counter#%CA%9F). The version of the Capsules typeface that was stored on Ethereum did not include intelligent small caps assignment, and so we are forced to use manually specify the small caps variant. 
+
+String length is calculated onchain using `bytes(string).length`. As a result, naively counting each byte as a single display character would fail for unicode and small caps, which may constitute more bytes, but only one monospaced visual character output. Thus calls to the `pad` function rely on passing desired `targetLength` values. If we're drawing the left side of a row, we might concatenate a string composed of two spaces with a right-padded string of 13 characters. If the string has no special characters, then we can simply call `pad(false, "L", 13)`, but if the string contains a special character, we'll have to add the number of extra bytes needed to represent it to the third argument: `pad (false, "ʟ", 14)`.
+
 ## Additional resources 
 - Useful byte length checker https://mothereff.in/byte-counter
 
