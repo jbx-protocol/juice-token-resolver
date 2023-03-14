@@ -33,17 +33,48 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
         uint256 projectId,
         Color textColor,
         Color bgColor,
-        Color bgColorDark
+        Color bgColorAlt
     );
     error InvalidTheme();
 
+    /**
+     * @notice The address of the Juicebox Funding Cycle Store contract.
+     */
     IJBFundingCycleStore public immutable fundingCycleStore;
+
+    /**
+     * @notice The address of the Juicebox Projects contract.
+     */
     IJBProjects public immutable projects;
+
+    /**
+     * @notice The address of the Juicebox Directory contract.
+     */
     IJBDirectory public immutable directory;
+
+    /**
+     * @notice The address of the Juicebox Token Store contract.
+     */
     IJBTokenStore public immutable tokenStore;
+
+    /**
+     * @notice The address of the Juicebox Controller contract.
+     */
     IJBController public immutable controller;
+
+    /**
+     * @notice The address of the Juicebox Project Handles contract.
+     */
     IJBProjectHandles public immutable projectHandles;
-    ITypeface public immutable capsulesTypeface; // Capsules typeface
+
+    /**
+     * @notice The address of the Capsules typeface contract.
+     */
+    ITypeface public immutable capsulesTypeface;
+
+    /**
+     * @notice Mapping containing the Theme struct for each project. Themes describe the color palette to be used when generating the token uri SVG.
+     */
     mapping(uint256 => Theme) public themes;
 
     constructor(
@@ -62,8 +93,10 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
         setDefaultTheme("FF9213", "44190F", "3A0F0C");
     }
 
-    // @notice Gets the Base64 encoded Capsules-500.otf typeface
-    /// @return fontSource The Base64 encoded font file
+    /**
+     * @notice Gets the Base64 encoded Capsules-500.otf typeface
+     * @return fontSource The Base64 encoded font file
+     */
     function getFontSource() internal view returns (bytes memory fontSource) {
         return
             ITypeface(capsulesTypeface).sourceOf(
@@ -71,12 +104,14 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
             ); // Capsules font source
     }
 
-    /// @notice Transform strings to target length by abbreviation or left padding with spaces.
-    /// @dev Shortens long strings to 13 characters including an ellipsis and adds left padding spaces to short strings. Allows variable target length to account for strings that have unicode characters that are longer than 1 byte but only take up 1 character space.
-    /// @param left True adds padding to the left of the passed string, and false adds padding to the right
-    /// @param str The string to transform
-    /// @param targetLength The length of the string to return
-    /// @return string The transformed string
+    /**
+     * @notice Transform strings to target length by abbreviation or left padding with spaces.
+     * @dev Shortens long strings to 13 characters including an ellipsis and adds left padding spaces to short strings. Allows variable target length to account for strings that have unicode characters that are longer than 1 byte but only take up 1 character space.
+     * @param left True adds padding to the left of the passed string, and false adds padding to the right
+     * @param str The string to transform
+     * @param targetLength The length of the string to return
+     * @return string The transformed string
+     */
     function pad(
         bool left,
         string memory str,
@@ -370,11 +405,18 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
         return string.concat(paddedTokenSupplyRight, paddedTokenSupplyLeft);
     }
 
+    /**
+     *  @notice Set theme colors for a given project. Values should be 6 character strings and all letters must be uppercase (e.g, "FFFFFF").
+     *  @dev Available only to project owners or operators with permission to set the token resolver on their behalf.
+     *  @param _textColor The color of the text.
+     *  @param _bgColor The primary background color.
+     *  @param _bgColorAlt The secondary background color.
+     */
     function setTheme(
         uint256 _projectId,
         string memory _textColor,
         string memory _bgColor,
-        string memory _bgColorDark
+        string memory _bgColorAlt
     )
         external
         requirePermission(
@@ -385,21 +427,28 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
     {
         Color textColor = newColorFromRGBString(_textColor);
         Color bgColor = newColorFromRGBString(_bgColor);
-        Color bgColorDark = newColorFromRGBString(_bgColorDark);
-        themes[_projectId] = Theme(true, textColor, bgColor, bgColorDark);
-        emit ThemeSet(_projectId, textColor, bgColor, bgColorDark);
+        Color bgColorAlt = newColorFromRGBString(_bgColorAlt);
+        themes[_projectId] = Theme(true, textColor, bgColor, bgColorAlt);
+        emit ThemeSet(_projectId, textColor, bgColor, bgColorAlt);
     }
 
+    /**
+     *  @notice Set default theme colors. Values should be 6 character strings and all letters must be uppercase (e.g, "FFFFFF").
+     *  @dev Available only to the owner of this contract.
+     *  @param _textColor The color of the text.
+     *  @param _bgColor The primary background color.
+     *  @param _bgColorAlt The secondary background color.
+     */
     function setDefaultTheme(
         string memory _textColor,
         string memory _bgColor,
-        string memory _bgColorDark
+        string memory _bgColorAlt
     ) public onlyOwner {
         Color textColor = newColorFromRGBString(_textColor);
         Color bgColor = newColorFromRGBString(_bgColor);
-        Color bgColorDark = newColorFromRGBString(_bgColorDark);
-        themes[0] = Theme(true, textColor, bgColor, bgColorDark);
-        emit ThemeSet(0, textColor, bgColor, bgColorDark);
+        Color bgColorAlt = newColorFromRGBString(_bgColorAlt);
+        themes[0] = Theme(true, textColor, bgColor, bgColorAlt);
+        emit ThemeSet(0, textColor, bgColor, bgColorAlt);
     }
 
     function getOwnerName(
@@ -431,6 +480,12 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
         return (tokenStore.totalSupplyOf(_projectId) / 10 ** 18).toString();
     }
 
+    /**
+     *  @notice Get the token uri for a project.
+     *  @dev Creates metadata for the given project ID using either the default Theme colors, or custom colors if they are set.
+     *  @param _projectId The id of the project.
+     *  @return tokenUri The token uri for the project.
+     */
     function getUri(
         uint256 _projectId
     ) external view override returns (string memory tokenUri) {
@@ -613,14 +668,14 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
                     '</text></g></g><defs><filter id="filter1" x="-3.36" y="26.04" width="298" height="160" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feMorphology operator="dilate" radius="0.1" in="SourceAlpha" result="thicken"/><feGaussianBlur in="thicken" stdDeviation="0.5" result="blurred"/><feFlood flood-color="#',
                     theme.textColor.toString(),
                     '" result="glowColor"/><feComposite in="glowColor" in2="blurred" operator="in" result="softGlow_colored"/><feMerge><feMergeNode in="softGlow_colored"/><feMergeNode in="SourceGraphic"/></feMerge></filter><linearGradient id="paint0" x1="0" y1="202" x2="289" y2="202" gradientUnits="userSpaceOnUse"><stop stop-color="#',
-                    theme.bgColorDark.toString(),
+                    theme.bgColorAlt.toString(),
                     '"/><stop offset="0.119792" stop-color="#'
                 ),
                 theme.bgColor.toString(),
                 '"/><stop offset="0.848958" stop-color="#',
                 theme.bgColor.toString(),
                 '"/><stop offset="1" stop-color="#',
-                theme.bgColorDark.toString(),
+                theme.bgColorAlt.toString(),
                 '"/></linearGradient><clipPath id="clip0"><rect width="289" height="160" /></clipPath></defs></svg>'
             );
     }
