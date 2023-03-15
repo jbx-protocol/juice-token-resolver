@@ -22,7 +22,7 @@ contract TokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
     /**
      * @notice The maximum amount of gas used by a resolver, to allow falling back on the default resolver.
      */
-    uint256 constant DEFAULT_RESOLVER_GAS_USAGE = 50_000_000;
+    uint256 constant MAX_RESOLVER_GAS_USAGE = 50_000_000;
 
     /**
      * @notice Emitted when the default IJBTokenUriResolver is set.
@@ -37,14 +37,15 @@ contract TokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
     /**
      * @notice Each project's IJBTokenUriResolver metadata contract.
      * @dev Mapping of projectId => tokenUriResolver
-     * @dev The 0 project returns the default resolver's address.
+     * @dev projectId 0 returns the default resolver address.
      * @return IJBTokenUriResolver The address of the IJBTokenUriResolver for the project, or 0 if none is set.
      */
     mapping(uint256 => IJBTokenUriResolver) public tokenUriResolvers;
 
     /**
      * @notice TokenUriResolver constructor.
-     * @dev Sets the default IJBTokenUriResolver. This resolver is used for all projects that do not have a custom resolver.
+     * @dev Sets the default IJBTokenUriResolver. This resolver is used for all projects that do not have a custom resolver. 
+     * @dev Sets immutable references to JBProjects and JBOperatorStore contracts.
      * @param _projects The address of the Juicebox Projects contract.
      * @param _operatorStore The address of the JBOperatorStore contract.
      * @param _defaultTokenUriResolver The address of the default IJBTokenUriResolver.
@@ -57,7 +58,7 @@ contract TokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
         projects = _projects;
         tokenUriResolvers[0] = IJBTokenUriResolver(_defaultTokenUriResolver);
     }
-
+    
     /**
      *  @notice Get the token uri for a project.
      *  @dev Called by `JBProjects.tokenUri(uint256)`. If a project has a custom IJBTokenUriResolver, it is used instead of the default resolver.
@@ -72,7 +73,8 @@ contract TokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
             return tokenUriResolvers[0].getUri(_projectId);
         }
 
-        try IJBTokenUriResolver(_resolver).getUri{gas: DEFAULT_RESOLVER_GAS_USAGE}(_projectId) returns (
+        // If the getUri call to _resolver exceeds the MAX_RESOLVER_GAS_USAGE, fall back to the default resolver. 
+        try IJBTokenUriResolver(_resolver).getUri{gas: MAX_RESOLVER_GAS_USAGE}(_projectId) returns (
             string memory _tokenUri
         ) {
             return _tokenUri;
