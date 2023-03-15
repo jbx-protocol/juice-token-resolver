@@ -116,8 +116,8 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
         if (length > targetLength) {
             str = string.concat(
                 StringSlicer.slice(str, 0, targetLength - 1), // Abbreviate to 1 character less than target length
-                unicode"…"
-            ); // And add an ellipsis
+                unicode"…" // And add an ellipsis
+            );
             return str;
         }
 
@@ -130,7 +130,7 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
                 ++i;
             }
         }
-        str = left ? string.concat(padding, str) : string.concat(str, padding);
+        str = left ? string.concat(padding, str) : string.concat(str, padding); // Left/right check
         return str;
     }
 
