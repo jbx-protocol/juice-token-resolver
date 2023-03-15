@@ -11,10 +11,9 @@ import {JBOperatable, IJBOperatorStore} from "@jbx-protocol/juice-contracts-v3/c
  * @title Juicebox TokenUriResolver Registry
  * @notice The registry serves metadata for all Juciebox Protocol v2 projects.
  * @dev The default metadata for all projects can be updated by the contract owner.
- * @dev Juicebox project owners can override the default metadata for their project with their own IJBTokenUriResolver contracts.
+ * @dev Juicebox project owners and operators can override the default metadata for their project with their own IJBTokenUriResolver contracts.
  */
 contract TokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
-    
     /**
      * @notice The address of the Juicebox Projects contract.
      */
@@ -28,17 +27,12 @@ contract TokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
     /**
      * @notice Emitted when the default IJBTokenUriResolver is set.
      */
-    event DefaultTokenUriResolverSet(
-        IJBTokenUriResolver indexed tokenUriResolver
-    );
-    
+    event DefaultTokenUriResolverSet(IJBTokenUriResolver indexed tokenUriResolver);
+
     /**
      * @notice Emitted when the Token Uri Resolver for a project is set.
      */
-    event ProjectTokenUriResolverSet(
-        uint256 indexed projectId,
-        IJBTokenUriResolver indexed tokenUriResolver
-    );
+    event ProjectTokenUriResolverSet(uint256 indexed projectId, IJBTokenUriResolver indexed tokenUriResolver);
 
     /**
      * @notice Each project's IJBTokenUriResolver metadata contract.
@@ -71,19 +65,16 @@ contract TokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
      *  @return tokenUri The token uri for the project.
      *  @inheritdoc IJBTokenUriResolver
      */
-    function getUri(uint256 _projectId)
-        external
-        view
-        override
-        returns (string memory tokenUri)
-    {
+    function getUri(uint256 _projectId) external view override returns (string memory tokenUri) {
         address _resolver = address(tokenUriResolvers[_projectId]);
 
-        if (_resolver == address(0)){
+        if (_resolver == address(0)) {
             return tokenUriResolvers[0].getUri(_projectId);
-        } 
-            
-        try IJBTokenUriResolver(_resolver).getUri{gas: DEFAULT_RESOLVER_GAS_USAGE}(_projectId) returns (string memory _tokenUri) {
+        }
+
+        try IJBTokenUriResolver(_resolver).getUri{gas: DEFAULT_RESOLVER_GAS_USAGE}(_projectId) returns (
+            string memory _tokenUri
+        ) {
             return _tokenUri;
         } catch {
             return tokenUriResolvers[0].getUri(_projectId);
@@ -99,14 +90,7 @@ contract TokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
     function setTokenUriResolverForProject(
         uint256 _projectId,
         IJBTokenUriResolver _resolver
-    )
-        external
-        requirePermission(
-            projects.ownerOf(_projectId),
-            _projectId,
-            JBUriOperations.SET_TOKEN_URI
-        )
-    {
+    ) external requirePermission(projects.ownerOf(_projectId), _projectId, JBUriOperations.SET_TOKEN_URI) {
         tokenUriResolvers[_projectId] = _resolver;
 
         emit ProjectTokenUriResolverSet(_projectId, _resolver);
@@ -117,21 +101,18 @@ contract TokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
      * @dev Only available to this contract's owner.
      * @param _resolver The address of the default token uri resolver.
      */
-    function setDefaultTokenUriResolver(IJBTokenUriResolver _resolver)
-        external
-        onlyOwner
-    {
+    function setDefaultTokenUriResolver(IJBTokenUriResolver _resolver) external onlyOwner {
         tokenUriResolvers[0] = IJBTokenUriResolver(_resolver);
 
         emit DefaultTokenUriResolverSet(_resolver);
     }
 
-   /**
+    /**
      * @notice Get the default IJBTokenUriResolver address.
      * @dev Convenience function for browsing contracts on block explorers.
      * @return IJBTokenURiResolver The address of the default token uri resolver.
      */
-    function defaultTokenUriResolver() external view returns (IJBTokenUriResolver){
+    function defaultTokenUriResolver() external view returns (IJBTokenUriResolver) {
         return tokenUriResolvers[0];
     }
 }
