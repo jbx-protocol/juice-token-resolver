@@ -2,20 +2,9 @@
 pragma solidity ^0.8.0;
 
 import "forge-std/Test.sol";
-
-// This function is in a separate contract so that TokenUriResolver can pass it a string memory and we can still use Array Slices (which only work on calldata)
-contract StringSlicer {
-    function slice(
-        string calldata _str,
-        uint256 _start,
-        uint256 _end
-    ) external pure returns (string memory) {
-        return string(bytes(_str)[_start:_end]);
-    }
-}
+import {StringSlicer} from "../src/Libraries/StringSlicer.sol";
 
 contract ContractTest is Test {
-    StringSlicer slice = new StringSlicer();
 
     function testLeftPadShorter() external {
         string memory str = "test";
@@ -63,7 +52,7 @@ contract ContractTest is Test {
             // Shorten strings strings longer than target length
             str = string(
                 abi.encodePacked(
-                    slice.slice(str, 0, targetLength - 1),
+                    StringSlicer.slice(str, 0, targetLength - 1),
                     unicode"…"
                 )
             ); // Shortens to 1 character less than target length and adds an ellipsis unicode character
