@@ -2,8 +2,8 @@
 pragma solidity ^0.8.0;
 
 import "forge-std/Test.sol";
-import {TokenUriResolver} from "../src/TokenUriResolver.sol";
-import "../src/DefaultTokenUriResolver.sol";
+import {TokenUriResolver, IJBProjects} from "../src/TokenUriResolver.sol";
+import {DefaultTokenUriResolver, IJBOperatorStore, IJBDirectory, IJBProjectHandles, ITypeface, IJBTokenUriResolver, JBOperatable, JBUriOperations} from "../src/DefaultTokenUriResolver.sol";
 import {JBOperatorData} from "@jbx-protocol/juice-contracts-v3/contracts/structs/JBOperatorData.sol";
 
 contract ContractTest is Test {
