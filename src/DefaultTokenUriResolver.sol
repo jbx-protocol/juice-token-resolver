@@ -1,13 +1,16 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+// Utility imports specific to this project
 import {Theme} from "./Structs/Theme.sol";
 import {StringSlicer} from "./Libraries/StringSlicer.sol";
-import {LibColor, Color, newColorFromRGBString} from "solcolor/src/Color.sol";
+
+// Utility imports
 import {Base64} from "base64-sol/base64.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
-import {Font, ITypeface} from "typeface/interfaces/ITypeface.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {Font, ITypeface} from "typeface/interfaces/ITypeface.sol";
+import {LibColor, Color, newColorFromRGBString} from "solcolor/src/Color.sol";
 
 // Juicebox imports
 import {IJBTokenUriResolver} from "@jbx-protocol/juice-contracts-v3/contracts/interfaces/IJBTokenUriResolver.sol";
@@ -577,7 +580,10 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
             );
     }
 
-    // borrowed from https://ethereum.stackexchange.com/questions/8346/convert-address-to-string
+    /**
+     * @notice Transforms addresses into strings
+     * @dev borrowed from https://ethereum.stackexchange.com/questions/8346/convert-address-to-string
+     */
     function toAsciiString(address x) internal pure returns (string memory) {
         bytes memory s = new bytes(40);
         for (uint256 i = 0; i < 20; ) {
@@ -593,6 +599,9 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
         return string(s);
     }
 
+    /**
+     * @notice Helps toAsciiString function
+     */
     function char(bytes1 b) internal pure returns (bytes1 c) {
         if (uint8(b) < 10) return bytes1(uint8(b) + 0x30);
         else return bytes1(uint8(b) + 0x57);
