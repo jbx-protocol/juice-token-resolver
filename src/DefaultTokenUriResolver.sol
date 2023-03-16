@@ -32,10 +32,10 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
     using LibColor for Color;
 
     /**
-     * @notice Emitted when a theme is set. Emitted when setting both the default and custom theme.
+     * @notice Emitted when a theme is set. Emitted when setting default and custom themes.
      */
     event ThemeSet(uint256 projectId, Color textColor, Color bgColor, Color bgColorAlt);
-    
+
     /**
      * @notice Emitted when a project's custom theme is reset to the default.
      */
@@ -70,7 +70,7 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
      * @notice Mapping containing each project's theme, if one is set. Themes describe the color palette to be used when generating the token uri SVG.
      * @dev Theme 0 is the default theme used for all projects without custom themes.
      */
-    mapping(uint256 => Theme) public themes;
+    mapping(uint256 => Theme) private themes;
 
     constructor(
         IJBOperatorStore _operatorStore,
@@ -84,6 +84,15 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
         projectHandles = _projectHandles;
         capsulesTypeface = _capsulesTypeface;
         setDefaultTheme("FF9213", "44190F", "3A0F0C");
+    }
+
+    /**
+     * @notice Gets the Theme for a given id in the private themes mapping.
+     * @param id The id of the theme to fetch.
+     * @return Theme The Theme corresponding to the id passed as an argument.
+     */
+    function getTheme(uint256 id) external view returns (Theme memory) {
+        return themes[id];
     }
 
     /**

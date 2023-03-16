@@ -235,8 +235,7 @@ contract ContractTest is Test {
             bgColorAlt: newColorFromRGBString("FFFAAA")
         });
         d.setTheme(projectId, "FFFFFF", "FFFAAA", "FFFAAA");
-        (bool x, Color r, Color g, Color b) = d.themes(projectId);
-        Theme memory newTheme = Theme({customTheme: x, textColor: r, bgColor: g, bgColorAlt: b});
+        Theme memory newTheme = d.getTheme(projectId);
         // Compare hash of new vs expected Theme
         assertEq(keccak256(abi.encode(newTheme)), keccak256(abi.encode(expectedTheme)));
     }
