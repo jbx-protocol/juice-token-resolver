@@ -88,7 +88,7 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
 
     /**
      * @notice Gets the Theme for a given id in the private themes mapping.
-     * @param id The id of the theme to fetch.
+     * @param id The id of the theme to fetch. This is the project's ID for all values except 0, which is the default theme.
      * @return Theme The Theme corresponding to the id passed as an argument.
      */
     function getTheme(uint256 id) external view returns (Theme memory) {
@@ -96,20 +96,20 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
     }
 
     /**
-     * @notice Gets the Base64 encoded Capsules-500.otf typeface
-     * @return fontSource The Base64 encoded font file
+     * @notice Gets the Base64 encoded Capsules-500.otf typeface.
+     * @return fontSource The Base64 encoded font file.
      */
     function getFontSource() internal view returns (bytes memory fontSource) {
         return ITypeface(capsulesTypeface).sourceOf(Font({weight: 500, style: "normal"})); // Capsules font source
     }
 
     /**
-     * @notice Transform strings to target length by abbreviation or left padding with spaces.
+     * @notice Transform strings to target length by abbreviating or padding with spaces.
      * @dev Shortens long strings to 13 characters including an ellipsis and adds left padding spaces to short strings. Allows variable target length to account for strings that have unicode characters that are longer than 1 byte but only take up 1 character space.
-     * @param left True adds padding to the left of the passed string, and false adds padding to the right
-     * @param str The string to transform
-     * @param targetLength The length of the string to return
-     * @return string The transformed string
+     * @param left True adds padding to the left of the passed string, and false adds padding to the right.
+     * @param str The string to transform.
+     * @param targetLength The length of the string to return.
+     * @return string The transformed string.
      */
     function pad(bool left, string memory str, uint256 targetLength) internal pure returns (string memory) {
         uint256 length = bytes(str).length;
@@ -120,10 +120,11 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
         }
 
         // If string is longer than target length, abbreviate it and add an ellipsis
+        // Note that the ellipsis character is 3 bytes, so the bytes length of the returned string will exceed targetLength by 2 bytes.
         if (length > targetLength) {
             str = string.concat(
                 StringSlicer.slice(str, 0, targetLength - 1), // Abbreviate to 1 character less than target length
-                unicode"…" // And add an ellipsis
+                unicode"…" // And add an ellipsis.
             );
             return str;
         }
@@ -132,15 +133,19 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
         string memory padding;
         uint256 _paddingToAdd = targetLength - length;
         for (uint256 i; i < _paddingToAdd; ) {
+            // Accumulate desired padding
             padding = string.concat(padding, " ");
             unchecked {
                 ++i;
             }
         }
-        str = left ? string.concat(padding, str) : string.concat(str, padding); // Left/right check
+        str = left ? string.concat(padding, str) : string.concat(str, padding); // Add padding to left or right
         return str;
     }
 
+    /**
+     * @notice Returns either a project's handle, if set, or a string with the project's ID number if no project handle is found.
+     */
     function getProjectName(uint256 _projectId) internal view returns (string memory projectName) {
         // Project Handle
         string memory _projectName;
@@ -159,6 +164,9 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
         return _projectName;
     }
 
+    /**
+     * @notice Gets the IJBSingleTokenPaymentTerminalStore for a given project.
+     */
     function getTerminalStore(uint256 _projectId) internal view returns (IJBSingleTokenPaymentTerminalStore) {
         return
             IJBSingleTokenPaymentTerminalStore(
@@ -168,6 +176,9 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
             );
     }
 
+    /**
+     * @notice Returns a right-padded string containing the project's current cycle number.
+     */
     function getRightPaddedCycle(
         JBFundingCycle memory _fundingCycle
     ) internal pure returns (string memory rightPaddedCycleString) {
@@ -176,6 +187,9 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
         return pad(false, string.concat(unicode"  cʏcʟᴇ ", fundingCycleIdString), 19);
     }
 
+    /**
+     * @notice Returns a left-padded string containing the time left in the project's current cycle.
+     */
     function getLeftPaddedTimeLeft(
         JBFundingCycle memory _fundingCycle
     ) internal view returns (string memory leftPaddedTimeLeftString) {
@@ -186,9 +200,9 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
         string memory paddedTimeLeft;
         string memory countString;
         if (duration == 0) {
-            paddedTimeLeft = string.concat(pad(true, string.concat(unicode" ɴoᴛ sᴇᴛ"), 22), "  "); // If the funding cycle has no duration, show infinite duration
+            paddedTimeLeft = string.concat(pad(true, string.concat(unicode" ɴoᴛ sᴇᴛ"), 22), "  "); // If the cycle has no duration, show NOT SET
         } else {
-            timeLeft = start + duration - block.timestamp; // Project's current funding cycle time left
+            timeLeft = start + duration - block.timestamp; // Time left in project's current cycle
             if (timeLeft > 2 days) {
                 countString = (timeLeft / 1 days).toString();
                 paddedTimeLeft = string.concat(
@@ -218,12 +232,18 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
         return paddedTimeLeft;
     }
 
+    /**
+     * @notice Returns a string containing the cycle count and time left.
+     */
     function getCycleTimeLeftRow(
         JBFundingCycle memory fundingCycle
     ) internal view returns (string memory cycleTimeLeftRow) {
         return string.concat(getRightPaddedCycle(fundingCycle), getLeftPaddedTimeLeft(fundingCycle));
     }
 
+    /**
+     * @notice Returns the balance row string.
+     */
     function getBalanceRow(
         IJBPaymentTerminal primaryEthPaymentTerminal,
         uint256 _projectId
@@ -232,38 +252,42 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
         uint256 balance = getTerminalStore(_projectId).balanceOf(
             IJBSingleTokenPaymentTerminal(address(primaryEthPaymentTerminal)),
             _projectId
-        ) / 10 ** 18; // Project's ETH balance //TODO Try/catch
+        ) / 10 ** 18; // Project's ETH balance
         string memory paddedBalanceLeft = string.concat(
             pad(true, string.concat(unicode"Ξ", balance.toString()), 14),
             "  "
         ); // Project's ETH balance as a string
-        string memory paddedBalanceRight = pad(false, unicode"  ʙᴀʟᴀɴcᴇ     ", 24); // ʙ = 2,    ᴀ = 3, ʟ = 2, ᴀ = 3, ɴ = 2, E = 3
+        string memory paddedBalanceRight = pad(false, unicode"  ʙᴀʟᴀɴcᴇ     ", 24);
         return string.concat(paddedBalanceRight, paddedBalanceLeft);
     }
 
+    /**
+     * @notice Returns a string containing the projects payouts. Used in the JSON metadata.
+     */
     function getPayouts(
         IJBPaymentTerminal primaryEthPaymentTerminal,
         uint256 _projectId
     ) internal view returns (string memory payouts) {
-        // Payouts
-        uint256 latestConfiguration = fundingCycleStore.latestConfigurationOf(_projectId); // Get project's current Cycle configuration
+        uint256 latestConfiguration = fundingCycleStore.latestConfigurationOf(_projectId); // Get project's current cycle configuration
         IJBController3_1 controller = IJBController3_1(directory.controllerOf(_projectId));
         IJBFundAccessConstraintsStore fundAccessConstraintStore = IJBFundAccessConstraintsStore(
             controller.fundAccessConstraintsStore()
         );
         (uint256 payoutsPreprocessed, uint256 payoutsCurrencyPreprocessed) = fundAccessConstraintStore
-            .distributionLimitOf(_projectId, latestConfiguration, primaryEthPaymentTerminal, JBTokens.ETH); // Project's payouts currency
+            .distributionLimitOf(_projectId, latestConfiguration, primaryEthPaymentTerminal, JBTokens.ETH); // Get raw payouts data
         string memory payoutsCurrency;
-        payoutsCurrencyPreprocessed == 1 ? payoutsCurrency = unicode"Ξ" : payoutsCurrency = "$";
-
-        return (string.concat(payoutsCurrency, (payoutsPreprocessed / 10 ** 18).toString())); // Project's payouts
+        payoutsCurrencyPreprocessed == 1 ? payoutsCurrency = unicode"Ξ" : payoutsCurrency = "$"; // Translate payouts currency into appropriate string
+        return (string.concat(payoutsCurrency, (payoutsPreprocessed / 10 ** 18).toString())); // Return string containing currency and payouts limit
     }
 
+    /**
+     * @notice Returns the payouts row string. Used in the SVG.
+     */
     function getPayoutsRow(
         IJBPaymentTerminal primaryEthPaymentTerminal,
         uint256 _projectId
     ) internal view returns (string memory payoutsRow) {
-        uint256 latestConfiguration = fundingCycleStore.latestConfigurationOf(_projectId); // Get project's current Cycle configuration
+        uint256 latestConfiguration = fundingCycleStore.latestConfigurationOf(_projectId); // Get project's current cycle configuration
         string memory payoutsCurrency;
         IJBController3_1 controller = IJBController3_1(directory.controllerOf(_projectId));
         IJBFundAccessConstraintsStore fundAccessConstraintStore = IJBFundAccessConstraintsStore(
@@ -277,19 +301,18 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
             payoutsCurrency = "$";
         }
         string memory payouts = string.concat(payoutsCurrency, (payoutsPreprocessed / 10 ** 18).toString()); // Project's payouts
-        string memory paddedDistributionLimitLeft = string.concat(
-            pad(true, payouts, 12 + bytes(payoutsCurrency).length),
-            "  "
-        );
-        string memory paddedDistributionLimitRight = string.concat(pad(false, unicode"  ᴘᴀʏouᴛs", 22));
-        return string.concat(paddedDistributionLimitRight, paddedDistributionLimitLeft);
+        string memory paddedPayoutsLeft = string.concat(pad(true, payouts, 12 + bytes(payoutsCurrency).length), "  ");
+        string memory paddedPayoutsRight = string.concat(pad(false, unicode"  ᴘᴀʏouᴛs", 22));
+        return string.concat(paddedPayoutsRight, paddedPayoutsLeft);
     }
 
+    /**
+     * @notice Returns the token supply row string.
+     */
     function getTokenSupplyRow(uint256 _projectId) internal view returns (string memory tokenSupplyRow) {
-        // Supply
         IJBController3_1 controller = IJBController3_1(directory.controllerOf(_projectId));
         IJBTokenStore tokenStore = controller.tokenStore();
-        uint256 totalSupply = tokenStore.totalSupplyOf(_projectId) / 10 ** 18; // Project's token total supply
+        uint256 totalSupply = tokenStore.totalSupplyOf(_projectId) / 10 ** 18; // Project's fungible token total supply
         string memory paddedTokenSupplyLeft = string.concat(pad(true, totalSupply.toString(), 13), "  "); // Project's token token supply as a string
         string memory paddedTokenSupplyRight = pad(false, unicode"  ᴛoᴋᴇɴ suᴘᴘʟʏ", 28);
         return string.concat(paddedTokenSupplyRight, paddedTokenSupplyLeft);
@@ -312,7 +335,7 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
         Color textColor = newColorFromRGBString(_textColor);
         Color bgColor = newColorFromRGBString(_bgColor);
         Color bgColorAlt = newColorFromRGBString(_bgColorAlt);
-        themes[_projectId] = Theme(true, textColor, bgColor, bgColorAlt);
+        themes[_projectId] = Theme(true, textColor, bgColor, bgColorAlt); // Custom themes have the customTheme value set to True
         emit ThemeSet(_projectId, textColor, bgColor, bgColorAlt);
     }
 
@@ -347,6 +370,9 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
         emit ThemeSet(0, textColor, bgColor, bgColorAlt);
     }
 
+    /**
+     * @notice Returns a string containing an abbreviated address as a string.
+     */
     function getOwnerName(address owner) internal pure returns (string memory ownerName) {
         return
             string.concat(
@@ -357,6 +383,9 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
             ); // Abbreviate owner address
     }
 
+    /**
+     * @notice Returns a string containing the project's ETH balance.
+     */
     function getBalance(
         uint256 _projectId,
         IJBPaymentTerminal primaryEthPaymentTerminal
@@ -368,6 +397,9 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
         return string(abi.encodePacked(unicode"Ξ", balance.toString()));
     }
 
+    /**
+     * @notice Returns a string containing the project's ETH balance.
+     */
     function getTokenSupply(uint256 _projectId) internal view returns (string memory) {
         IJBController3_1 controller = IJBController3_1(directory.controllerOf(_projectId));
         IJBTokenStore tokenStore = controller.tokenStore();
@@ -389,6 +421,7 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
             // Get Project's Primary ETH Terminal
             IJBPaymentTerminal primaryEthPaymentTerminal = directory.primaryTerminalOf(_projectId, JBTokens.ETH);
 
+            // Create JSON metadata and properties
             parts[0] = string(
                 abi.encodePacked(
                     '{"name":"',
@@ -413,11 +446,12 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
             // Owner
             address owner = projects.ownerOf(_projectId); // Project's owner
 
+            // Create SVG
             // Each line (row) of the SVG is 30 monospaced characters long
             // The first half of each line (15 chars) is the title
             // The second half of each line (15 chars) is the value
             // The first and last characters on the line are two spaces
-            // The first line (head) is an exception.
+            // The first line (head) has exceptional layout.
             parts[1] = Base64.encode(
                 getPartThree(
                     getPartTwo(
@@ -432,7 +466,7 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
             );
         }
 
-        // parts[3] = string('"}'); // Close the JSON object
+        // Complete the JSON metadata
         string memory uri = string.concat(
             string("data:application/json;base64,"),
             Base64.encode(abi.encodePacked(parts[0], parts[1], string('"}')))
@@ -440,36 +474,17 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
         return uri;
     }
 
-    // borrowed from https://ethereum.stackexchange.com/questions/8346/convert-address-to-string
-    function toAsciiString(address x) internal pure returns (string memory) {
-        bytes memory s = new bytes(40);
-        for (uint256 i = 0; i < 20; ) {
-            bytes1 b = bytes1(uint8(uint256(uint160(x)) / (2 ** (8 * (19 - i)))));
-            bytes1 hi = bytes1(uint8(b) / 16);
-            bytes1 lo = bytes1(uint8(b) - 16 * uint8(hi));
-            s[2 * i] = char(hi);
-            s[2 * i + 1] = char(lo);
-            unchecked {
-                ++i;
-            }
-        }
-        return string(s);
-    }
-
-    function char(bytes1 b) internal pure returns (bytes1 c) {
-        if (uint8(b) < 10) return bytes1(uint8(b) + 0x30);
-        else return bytes1(uint8(b) + 0x57);
-    }
-
+    /**
+     * @notice Get SVG part one.
+     */
     function getPartOne(uint256 _projectId, string memory projectName) internal view returns (bytes memory) {
-        // Theme
-        Theme memory theme = themes[_projectId].customTheme == true ? themes[_projectId] : themes[0];
+        Theme memory theme = themes[_projectId].customTheme == true ? themes[_projectId] : themes[0]; // Get Theme
 
         return
             abi.encodePacked(
                 abi.encodePacked(
                     '<svg width="289" height="160" viewBox="0 0 289 160" xmlns="http://www.w3.org/2000/svg"><style>@font-face{font-family:"Capsules-500";src:url(data:font/truetype;charset=utf-8;base64,',
-                    getFontSource(), // import Capsules typeface
+                    getFontSource(), // get Capsules typeface
                     ');format("opentype");}a,a:visited,a:hover{fill:inherit;text-decoration:none;}text{font-size:16px;fill:#',
                     theme.textColor.toString(),
                     ';font-family:"Capsules-500",monospace;font-weight:500;white-space:pre;}#head text{fill:#',
@@ -488,6 +503,9 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
             );
     }
 
+    /**
+     * @notice Get SVG part two.
+     */
     function getPartTwo(
         bytes memory _base,
         uint256 _projectId,
@@ -500,7 +518,7 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
         return
             abi.encodePacked(
                 abi.encodePacked(
-                    _base,
+                    _base, // Part one
                     // Line 1: Cycle + Time left
                     '<g filter="url(#filter1)"><text x="0" y="48">',
                     getCycleTimeLeftRow(fundingCycle),
@@ -534,9 +552,11 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
             );
     }
 
+    /**
+     * @notice Get SVG part three
+     */
     function getPartThree(bytes memory _base, uint256 _projectId) internal view returns (bytes memory) {
-        // Theme
-        Theme memory theme = themes[_projectId].customTheme == true ? themes[_projectId] : themes[0];
+        Theme memory theme = themes[_projectId].customTheme == true ? themes[_projectId] : themes[0]; // Get Theme
 
         return
             abi.encodePacked(
@@ -555,5 +575,26 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
                 theme.bgColorAlt.toString(),
                 '"/></linearGradient><clipPath id="clip0"><rect width="289" height="160" /></clipPath></defs></svg>'
             );
+    }
+
+    // borrowed from https://ethereum.stackexchange.com/questions/8346/convert-address-to-string
+    function toAsciiString(address x) internal pure returns (string memory) {
+        bytes memory s = new bytes(40);
+        for (uint256 i = 0; i < 20; ) {
+            bytes1 b = bytes1(uint8(uint256(uint160(x)) / (2 ** (8 * (19 - i)))));
+            bytes1 hi = bytes1(uint8(b) / 16);
+            bytes1 lo = bytes1(uint8(b) - 16 * uint8(hi));
+            s[2 * i] = char(hi);
+            s[2 * i + 1] = char(lo);
+            unchecked {
+                ++i;
+            }
+        }
+        return string(s);
+    }
+
+    function char(bytes1 b) internal pure returns (bytes1 c) {
+        if (uint8(b) < 10) return bytes1(uint8(b) + 0x30);
+        else return bytes1(uint8(b) + 0x57);
     }
 }
