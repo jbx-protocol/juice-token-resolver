@@ -1,9 +1,9 @@
 {
   "dependencies": {
-    "@ensdomains/ens-contracts": "^0.0.17",
-    "@jbx-protocol/juice-contracts-v3": "^2.0.5",
+    "@ensdomains/ens-contracts": "^0.0.20",
+    "@jbx-protocol/juice-contracts-v3": "^3.1.1",
     "@jbx-protocol/project-handles": "^2.0.4",
-    "@openzeppelin/contracts": "^4.8.1",
+    "@openzeppelin/contracts": "^4.8.2",
     "@paulrberg/contracts": "^3.7.0",
     "base64-sol": "^1.1.0"
   }
