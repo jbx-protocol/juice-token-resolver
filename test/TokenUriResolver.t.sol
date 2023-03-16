@@ -6,10 +6,17 @@ import {TokenUriResolver, IJBProjects} from "../src/TokenUriResolver.sol";
 import {DefaultTokenUriResolver, Theme, LibColor, Color, newColorFromRGBString, IJBOperatorStore, IJBDirectory, IJBProjectHandles, ITypeface, IJBTokenUriResolver, JBOperatable, JBUriOperations} from "../src/DefaultTokenUriResolver.sol";
 import {JBOperatorData} from "@jbx-protocol/juice-contracts-v3/contracts/structs/JBOperatorData.sol";
 
+// Helper contract for tests
+contract RevertingResolver is IJBTokenUriResolver {
+    function getUri(uint256 _projectId) external view returns (string memory tokenUri) {
+        _projectId;
+        tokenUri;
+        revert();
+    }
+}
+
 contract ContractTest is Test {
     using LibColor for Color;
-    // Anticipated errors
-    error UNAUTHORIZED();
 
     // DefaultTokenUriResolver constructor args
     IJBOperatorStore public operatorStore = IJBOperatorStore(0x6F3C5afCa0c9eDf3926eF2dDF17c8ae6391afEfb);
@@ -31,7 +38,7 @@ contract ContractTest is Test {
     // Tests that the default resolver works correctly
     function testGetDefaultMetadata() public {
         string memory x = t.getUri(1);
-        assertTrue(keccak256(abi.encodePacked(x)) != keccak256(abi.encodePacked(string(""))));
+        assertTrue(keccak256(abi.encodePacked(x)) != keccak256(abi.encodePacked(string("")))); // Todo Weak test.
         string[] memory inputs = new string[](3);
         inputs[0] = "node";
         inputs[1] = "./open.js";
@@ -41,11 +48,11 @@ contract ContractTest is Test {
     }
 
     // Tests that setting a new default resolver works
-    function testSetDefaultMetadata() public {
+    function testSetDefaultResolver() public {
         uint256 projectId = 1;
         // Get the default metadata
         string memory defaultMetadata = t.getUri(projectId);
-        // Set a theme on the original resolver
+        // Set a custom theme on the original resolver
         vm.prank(0xAF28bcB48C40dBC86f52D459A6562F658fc94B1e);
         d.setTheme(projectId, "FFFFFF", "000FFF", "000FFF");
         // Create and set a new default resolver
@@ -56,6 +63,7 @@ contract ContractTest is Test {
             capsulesTypeface
         );
         t.setDefaultTokenUriResolver(n);
+        // Check that the new resolver metadata matches the original
         assertEq(t.getUri(1), defaultMetadata, "New default metadata does not match");
         // Get metadata from the new resolver
         string memory x = t.getUri(1);
@@ -91,6 +99,7 @@ contract ContractTest is Test {
         t.setDefaultTokenUriResolver(IJBTokenUriResolver(address(uint160(55))));
         // Attempt as owner
         t.setDefaultTokenUriResolver(IJBTokenUriResolver(address(uint160(55))));
+        assertEq(address(t.defaultTokenUriResolver()), address(uint160(55)));
     }
 
     // Tests that the default resolver cannot be set via the setTokenUriResolverForProject function
@@ -192,6 +201,19 @@ contract ContractTest is Test {
         vm.prank(0x1234567890123456789012345678901234567890);
         vm.expectRevert(JBOperatable.UNAUTHORIZED.selector);
         t.setTokenUriResolverForProject(projectId2, IJBTokenUriResolver(address(uint160(55))));
+    }
+
+    // Test that reverting custom resolver falls back to the default resolver
+    function testCustomResolverReverts() public {
+        // Get default metadata
+        string memory defaultMetadata = t.getUri(1);
+        // Set custom resolver that reverts for project 1
+        RevertingResolver revertingResolver = new RevertingResolver();
+        vm.prank(0xAF28bcB48C40dBC86f52D459A6562F658fc94B1e);
+        t.setTokenUriResolverForProject(1, IJBTokenUriResolver(revertingResolver));
+        string memory newMetadata = t.getUri(1);
+        // Confirm that it falls back to the default
+        assertEq(keccak256(abi.encodePacked(defaultMetadata)), keccak256(abi.encodePacked(newMetadata)));
     }
 
     /*//////////////////////////////////////////////////////////////
