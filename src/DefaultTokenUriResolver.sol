@@ -32,12 +32,12 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
     using LibColor for Color;
 
     /**
-     * @notice Emitted when a Theme is set. Emitted when setting both the default and custom theme.
+     * @notice Emitted when a theme is set. Emitted when setting both the default and custom theme.
      */
     event ThemeSet(uint256 projectId, Color textColor, Color bgColor, Color bgColorAlt);
     
     /**
-     * @notice Emitted when a project's custom Theme is reset to the default.
+     * @notice Emitted when a project's custom theme is reset to the default.
      */
     event ThemeReset(uint256 projectId);
 
@@ -67,7 +67,8 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
     ITypeface public immutable capsulesTypeface;
 
     /**
-     * @notice Mapping containing each project's Theme, if one is set. Themes describe the color palette to be used when generating the token uri SVG.
+     * @notice Mapping containing each project's theme, if one is set. Themes describe the color palette to be used when generating the token uri SVG.
+     * @dev Theme 0 is the default theme used for all projects without custom themes.
      */
     mapping(uint256 => Theme) public themes;
 
