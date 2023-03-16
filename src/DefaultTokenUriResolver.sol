@@ -8,6 +8,8 @@ import {Base64} from "base64-sol/base64.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {Font, ITypeface} from "typeface/interfaces/ITypeface.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+
+// Juicebox imports
 import {IJBTokenUriResolver} from "@jbx-protocol/juice-contracts-v3/contracts/interfaces/IJBTokenUriResolver.sol";
 import {IJBToken, IJBTokenStore} from "@jbx-protocol/juice-contracts-v3/contracts/interfaces/IJBTokenStore.sol";
 import {JBFundingCycle} from "@jbx-protocol/juice-contracts-v3/contracts/structs/JBFundingCycle.sol";
@@ -29,8 +31,15 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
     using Strings for uint256;
     using LibColor for Color;
 
+    /**
+     * @notice Emitted when a Theme is set. Emitted when setting both the default and custom theme.
+     */
     event ThemeSet(uint256 projectId, Color textColor, Color bgColor, Color bgColorAlt);
-    error InvalidTheme();
+    
+    /**
+     * @notice Emitted when a project's custom Theme is reset to the default.
+     */
+    event ThemeReset(uint256 projectId);
 
     /**
      * @notice The address of the Juicebox Funding Cycle Store contract.
@@ -58,7 +67,7 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
     ITypeface public immutable capsulesTypeface;
 
     /**
-     * @notice Mapping containing the Theme struct for each project. Themes describe the color palette to be used when generating the token uri SVG.
+     * @notice Mapping containing each project's Theme, if one is set. Themes describe the color palette to be used when generating the token uri SVG.
      */
     mapping(uint256 => Theme) public themes;
 
@@ -279,6 +288,7 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
     /**
      *  @notice Set theme colors for a given project. Values should be 6 character strings and all letters must be uppercase (e.g, "FFFFFF").
      *  @dev Available only to project owners or operators with permission to set the token resolver on their behalf.
+     *  @param _projectId The project's ID number.
      *  @param _textColor The color of the text.
      *  @param _bgColor The primary background color.
      *  @param _bgColorAlt The secondary background color.
@@ -294,6 +304,18 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
         Color bgColorAlt = newColorFromRGBString(_bgColorAlt);
         themes[_projectId] = Theme(true, textColor, bgColor, bgColorAlt);
         emit ThemeSet(_projectId, textColor, bgColor, bgColorAlt);
+    }
+
+    /**
+     *  @notice Reset theme for a given project to the default.
+     *  @dev Available only to project owners or operators with permission to set the token resolver on their behalf.
+     *  @param _projectId The project's ID number.
+     */
+    function resetTheme(
+        uint256 _projectId
+    ) external requirePermission(projects.ownerOf(_projectId), _projectId, JBUriOperations.SET_TOKEN_URI) {
+        delete themes[_projectId];
+        emit ThemeReset(_projectId);
     }
 
     /**
