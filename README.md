@@ -43,11 +43,11 @@ Run the following commands sequentially. You'll need to replace values marked wi
 `forge create --rpc-url $GOERLI_RPC_URL --private-key $GOERLI_PRIV_KEY --etherscan-api-key $ETHERSCAN_API_KEY --verify lib/solcolor/src/Color.sol:LibColor`
 
 #### DefaultTokenUriResolver
-Update `foundry.toml`'s `libraries` key with the deployment addresses returned when you deployed StringSlicer and LibColor in the last two steps.
+Update `foundry.toml`'s `libraries` key with the deployment addresses returned when you deployed StringSlicer and LibColor in the last two steps. For example `libraries = ["src/Libraries/StringSlicer.sol:StringSlicer:0x82bc76262e54d5f0de1f0c632d169f60042738b9", "lib/solcolor/src/Color.sol:LibColor:0xc483014cbae9f4652b40cfabbbd4e9017b9d7ab9"]`.
 
-`forge create --rpc-url $GOERLI_RPC_URL --constructor-args-path constructor-args/DefaultTokenUriResolver/goerli_constructor_args --libraries src/Libraries/StringSlicer.sol:StringSlicer:<DEPLOYED_ADDRESS> --private-key $GOERLI_PRIV_KEY --etherscan-api-key $ETHERSCAN_API_KEY --verify src/DefaultTokenUriResolver.sol:DefaultTokenUriResolver`
+`forge create --rpc-url $GOERLI_RPC_URL --constructor-args-path constructor-args/DefaultTokenUriResolver/goerli_constructor_args --private-key $GOERLI_PRIV_KEY --etherscan-api-key $ETHERSCAN_API_KEY --verify src/DefaultTokenUriResolver.sol:DefaultTokenUriResolver`
 
-#### TokenUriResolver (untested)
+#### TokenUriResolver
 Update the third address in `/constructor-args/tokenUriResolver/goerli_constructor_args` to the DefaultTokenUriResolver deployed in the previous step.
 
 `forge create --rpc-url $GOERLI_RPC_URL --constructor-args-path constructor-args/TokenUriResolver/goerli_constructor_args --private-key $GOERLI_PRIV_KEY --etherscan-api-key $ETHERSCAN_API_KEY --verify src/TokenUriResolver.sol:TokenUriResolver`
