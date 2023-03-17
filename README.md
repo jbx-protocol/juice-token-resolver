@@ -1,6 +1,6 @@
 # Juicebox Token Resolver
 
-Creates onchain SVG Metadata for all v2 Juicebox projects.
+Creates onchain SVG Metadata for all v2 Juicebox projects on JBController 3.1.
 
 ## Getting started
 
@@ -34,7 +34,7 @@ Run `forge test --fork-url $ETH_RPC_URL -v --ffi --match-test Get`
 Note: Update `foundry.toml`'s `solc` reference as needed.
 
 ### Goerli
-Run the following commands sequentially. You'll need to replace values marked with `$` and `<DEPLOYED_ADDRESS>`, and update the `constructor-args` files with addresses that correspond to your deployment — specifically the last constructor arg for both DefaultTokenUriResolver and TokenUriResolver.
+Run the following commands sequentially. You'll need to replace values marked with `$` and `<DEPLOYED_ADDRESS>`, and update the `constructor-args` files with addresses that correspond to your deployment — specifically the last constructor arg for both DefaultTokenUriResolver and TokenUriResolver. 
 
 #### StringSlicer
 `forge create --rpc-url $GOERLI_RPC_URL --private-key $GOERLI_PRIV_KEY --etherscan-api-key $ETHERSCAN_API_KEY --verify src/Libraries/StringSlicer.sol:StringSlicer`
@@ -43,7 +43,7 @@ Run the following commands sequentially. You'll need to replace values marked wi
 `forge create --rpc-url $GOERLI_RPC_URL --private-key $GOERLI_PRIV_KEY --etherscan-api-key $ETHERSCAN_API_KEY --verify lib/solcolor/src/Color.sol:LibColor`
 
 #### DefaultTokenUriResolver
-Update `foundry.toml`'s `libraries` key with the deployment addresses returned when you deployed StringSlicer and LibColor in the last two steps. For example `libraries = ["src/Libraries/StringSlicer.sol:StringSlicer:0x82bc76262e54d5f0de1f0c632d169f60042738b9", "lib/solcolor/src/Color.sol:LibColor:0xc483014cbae9f4652b40cfabbbd4e9017b9d7ab9"]`.
+Update `foundry.toml`'s `libraries` key with the deployment addresses returned when you deployed StringSlicer and LibColor in the last two steps. For example `libraries = ["src/Libraries/StringSlicer.sol:StringSlicer:0x82bc76262e54d5f0de1f0c632d169f60042738b9", "lib/solcolor/src/Color.sol:LibColor:0xc483014cbae9f4652b40cfabbbd4e9017b9d7ab9"]`. Note: mainnet forking tests **will fail** if run with this Libraries value in place. You can `git stash` when testing against mainnet and `git pop` when ready to deploy to Goerli. 
 
 `forge create --rpc-url $GOERLI_RPC_URL --constructor-args-path constructor-args/DefaultTokenUriResolver/goerli_constructor_args --private-key $GOERLI_PRIV_KEY --etherscan-api-key $ETHERSCAN_API_KEY --verify src/DefaultTokenUriResolver.sol:DefaultTokenUriResolver`
 
