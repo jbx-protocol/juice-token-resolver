@@ -1,0 +1,16 @@
+# Lessons learned building onchain SVG token resolvers: 
+
+## SVG
+- Figma is a good tool for drawing your initial SVGs because it doesn't add much cruft to the SVG. Inksacpe, by comparison, creates very ugly files full of unecessary IDs. Using an SVG WYSIWYG editor that creates clean files will simplify subsequent steps.
+- Once you have the SVG drawn, take it into a tool like [SVGViewer](https://www.svgviewer.dev/) (there are undoubtedly better options) and remove everything extraneous. If your elements make reference to each other (filters for example) then you can shorten their ID and other parameter names to the bare minimum. The live preview will help you to confirm that the SVG still functions. 
+- If you're using complex effects in Figma, your SVG may contain complex SVG tags. For example, Figma's outer glow uses `feColorMatrix`, which takes a 5x5 matrix of values to transform the base object's colors to create the glow. Creating a 5x5 matrix of colors is excessive for the application we wanted, and online searches revealed [another approach](https://codepen.io/dipscom/pen/mVYjPw) to achieve outer glow that accepts simple Hex colors, instead.
+
+## Solidity
+- If your SVG depends on chain data, use mainnet and testnet forking to avoid having to redeploying protocols and instantiate projects/nfts on those protocols each time you run tests. You can avoid getting lost in the weeds of other protocols, and benefit from testing against real world data, by forking instead.
+- Avoid `via-ir`. While passing `--via-ir` to `forge build` or `forge test` makes it easy to compile contracts that push the stack's limits, it is best to avoid using the intermediate representation compilation if possible. Etherscan cannot (currently 2023-03) verify contracts compiled with via-ir. It is also slower to compile. If you find it stifling to worry too much about stack optimization early on, you can do an optimization pass at the end, instead. 
+- Storing strings in memory takes up space in the stack, leading to `stack too deep` errors. While it's tempting, avoid creating too many strings that you subsequently concatenate. Instead, split your SVG construction into several internal functions that fetch the values you need, concatenate them without storing them in memory, and return those complete strings to a higher level SVG rendering funciton that can compile only a small number of prepared strings that contain all of the data you need.
+- Array slices are a practical way to chop long strings into shorter strings, to fit nicely into your onchain svg. Array slices only work on calldata, and so you cannot use them in internal funcitons on memory strings. Putting the array slice function into a library like `libraries/StringSlicer.sol` is a convenient way to access them from your contract. 
+
+
+## Deploying
+- Libraries cannot be dynamically linked in Forge (at 2023-03). If your contract uses libaries, you have to deploy them, then link them in the subsequent `forge create` call. See the [Foundry Book docs](https://book.getfoundry.sh/reference/forge/forge-create?highlight=create#linker-options): `forge create --libraries <remapped path to lib>:<library name>:<address>`
