@@ -486,13 +486,13 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
         return
             abi.encodePacked(
                 abi.encodePacked(
-                    '<svg width="289" height="160" viewBox="0 0 289 160" xmlns="http://www.w3.org/2000/svg"><style>@font-face{font-family:"Capsules-500";src:url(data:font/truetype;charset=utf-8;base64,',
+                    '<svg width="289" height="150" viewBox="0 0 289 150" xmlns="http://www.w3.org/2000/svg"><style>@font-face{font-family:"Capsules-500";src:url(data:font/truetype;charset=utf-8;base64,',
                     getFontSource(), // get Capsules typeface
                     ');format("opentype");}a,a:visited,a:hover{fill:inherit;text-decoration:none;}text{font-size:16px;fill:#',
                     theme.textColor.toString(),
                     ';font-family:"Capsules-500",monospace;font-weight:500;white-space:pre;}#head text{fill:#',
                     theme.bgColor.toString(),
-                    ';}</style><g clip-path="url(#clip0)"><path d="M289 0H0V160H289V0Z" fill="url(#paint0)"/><rect width="289" height="22" fill="#',
+                    ';}</style><g clip-path="url(#clip0)"><path d="M289 0H0V150H289V0Z" fill="url(#paint0)"/><rect width="289" height="22" fill="#',
                     theme.textColor.toString()
                 ),
                 '"/><g id="head"><a href="https://juicebox.money/v2/p/',
@@ -565,7 +565,7 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
             abi.encodePacked(
                 abi.encodePacked(
                     _base,
-                    '</text></g></g><defs><filter id="filter1" x="-3.36" y="26.04" width="298" height="160" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feMorphology operator="dilate" radius="0.1" in="SourceAlpha" result="thicken"/><feGaussianBlur in="thicken" stdDeviation="0.5" result="blurred"/><feFlood flood-color="#',
+                    '</text></g></g><defs><filter id="filter1" x="-3.36" y="26.04" width="298" height="150" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feMorphology operator="dilate" radius="0.1" in="SourceAlpha" result="thicken"/><feGaussianBlur in="thicken" stdDeviation="0.5" result="blurred"/><feFlood flood-color="#',
                     theme.textColor.toString(),
                     '" result="glowColor"/><feComposite in="glowColor" in2="blurred" operator="in" result="softGlow_colored"/><feMerge><feMergeNode in="softGlow_colored"/><feMergeNode in="SourceGraphic"/></feMerge></filter><linearGradient id="paint0" x1="0" y1="202" x2="289" y2="202" gradientUnits="userSpaceOnUse"><stop stop-color="#',
                     theme.bgColorAlt.toString(),
@@ -576,7 +576,7 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
                 theme.bgColor.toString(),
                 '"/><stop offset="1" stop-color="#',
                 theme.bgColorAlt.toString(),
-                '"/></linearGradient><clipPath id="clip0"><rect width="289" height="160" /></clipPath></defs></svg>'
+                '"/></linearGradient><clipPath id="clip0"><rect width="289" height="150" /></clipPath></defs></svg>'
             );
     }
 
