@@ -291,6 +291,11 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
                 JBTokens.ETH
             ); // Project's payouts and currency
         }
+        if (payoutsPreprocessed == type(uint232).max) {
+            // If are set to unlimited
+            return
+                unicode"∞"; // Return Payouts = infinity
+        }
         string memory payoutsCurrency;
         payoutsCurrencyPreprocessed == 1 ? payoutsCurrency = unicode"Ξ" : payoutsCurrency = "$"; // Translate payouts currency into appropriate string
         return (string.concat(payoutsCurrency, (payoutsPreprocessed / 10 ** 18).toString())); // Return string containing currency and payouts limit
@@ -330,11 +335,10 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
                 JBTokens.ETH
             ); // Project's payouts and currency
         }
-        if (payoutsPreprocessed == type(uint232).max) { // If are set to unlimited
-            return string.concat( // Return Payouts = infinity
-                pad(false, unicode"  ᴘᴀʏouᴛs", 22),
-                pad(true, string.concat(unicode"∞"), 15)
-            );
+        if (payoutsPreprocessed == type(uint232).max) {
+            // If are set to unlimited
+            return
+                string.concat(pad(false, unicode"  ᴘᴀʏouᴛs", 22), pad(true, string.concat(unicode"∞"), 15)); // Return Payouts = infinity
         }
         ////
         if (payoutsCurrencyPreprocessed == 1) {
