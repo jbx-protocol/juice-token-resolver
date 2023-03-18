@@ -305,7 +305,7 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
     ) internal view returns (string memory payoutsRow) {
         uint256 latestConfiguration = fundingCycleStore.latestConfigurationOf(_projectId); // Get project's current cycle configuration
         string memory payoutsCurrency;
-        /////
+        ///// NEW CODE
         address controllerAddress = directory.controllerOf(_projectId); // Get project's controller address
         uint256 payoutsPreprocessed;
         uint256 payoutsCurrencyPreprocessed;
@@ -329,6 +329,12 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
                 primaryEthPaymentTerminal,
                 JBTokens.ETH
             ); // Project's payouts and currency
+        }
+        if (payoutsPreprocessed == type(uint232).max) { // If are set to unlimited
+            return string.concat( // Return Payouts = infinity
+                pad(false, unicode"  ᴘᴀʏouᴛs", 22),
+                pad(true, string.concat(unicode"∞"), 15)
+            );
         }
         ////
         if (payoutsCurrencyPreprocessed == 1) {
