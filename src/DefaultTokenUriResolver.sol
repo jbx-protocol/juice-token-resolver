@@ -293,8 +293,7 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
         }
         if (payoutsPreprocessed == type(uint232).max) {
             // If are set to unlimited
-            return
-                unicode"∞"; // Return Payouts = infinity
+            return unicode"∞"; // Return Payouts = infinity
         }
         string memory payoutsCurrency;
         payoutsCurrencyPreprocessed == 1 ? payoutsCurrency = unicode"Ξ" : payoutsCurrency = "$"; // Translate payouts currency into appropriate string
@@ -310,12 +309,11 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
     ) internal view returns (string memory payoutsRow) {
         uint256 latestConfiguration = fundingCycleStore.latestConfigurationOf(_projectId); // Get project's current cycle configuration
         string memory payoutsCurrency;
-        ///// NEW CODE
         address controllerAddress = directory.controllerOf(_projectId); // Get project's controller address
         uint256 payoutsPreprocessed;
         uint256 payoutsCurrencyPreprocessed;
+        // If the project is using Controller v3.1
         if (controllerAddress == address(controller3_1)) {
-            // If the project is using Controller v3.1
             IJBFundAccessConstraintsStore fundAccessConstraintStore = IJBFundAccessConstraintsStore(
                 controller3_1.fundAccessConstraintsStore()
             );
@@ -326,8 +324,8 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
                 JBTokens.ETH
             ); // Get raw payouts data
         }
+        // If the project is using the original Controller
         if (controllerAddress == address(controller)) {
-            // If the project is using the original Controller
             (payoutsPreprocessed, payoutsCurrencyPreprocessed) = controller.distributionLimitOf(
                 _projectId,
                 latestConfiguration,
@@ -337,10 +335,8 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
         }
         if (payoutsPreprocessed == type(uint232).max) {
             // If are set to unlimited
-            return
-                string.concat(pad(false, unicode"  ᴘᴀʏouᴛs", 22), pad(true, string.concat(unicode"∞"), 15)); // Return Payouts = infinity
+            return string.concat(pad(false, unicode"  ᴘᴀʏouᴛs", 22), pad(true, string.concat(unicode"∞"), 15)); // Return Payouts = infinity
         }
-        ////
         if (payoutsCurrencyPreprocessed == 1) {
             payoutsCurrency = unicode"Ξ";
         } else {
@@ -365,6 +361,7 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
             IJBController3_1 c = IJBController3_1(_controller);
             return c.tokenStore();
         }
+        revert("getTokenStore: UNRECOGNIZED_CONTROLLER");
     }
 
     /**
