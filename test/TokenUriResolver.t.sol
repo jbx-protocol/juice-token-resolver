@@ -5,7 +5,7 @@ import "forge-std/Test.sol";
 import {TokenUriResolver, IJBProjects} from "../src/TokenUriResolver.sol";
 import {DefaultTokenUriResolver, Theme, LibColor, Color, newColorFromRGBString, IJBOperatorStore, IJBDirectory, IJBProjectHandles, ITypeface, IJBTokenUriResolver, JBOperatable, JBUriOperations, IJBController, IJBController3_1} from "../src/DefaultTokenUriResolver.sol";
 import {JBOperatorData} from "@jbx-protocol/juice-contracts-v3/contracts/structs/JBOperatorData.sol";
-import {KNOWN_OUTPUT} from "./KnownOutput.sol";
+import {KNOWN_OUTPUT_DIRECTORY_V2_CONTROLLER_V1, KNOWN_OUTPUT_DIRECTORY_V3_CONTROLLER_V1, KNOWN_OUTPUT_DIRECTORY_V3_CONTROLLER_V3_1} from "./KnownOutput.sol";
 
 // Helper contract for tests
 contract RevertingResolver is IJBTokenUriResolver {
@@ -30,6 +30,14 @@ contract ContractTest is Test {
     // Additional TokenUriResolver mainnet constructor args
     IJBProjects public _projects = IJBProjects(0xD8B4359143eda5B2d763E127Ed27c77addBc47d3);
 
+    /*//////////////////////////////////////////////////////////////
+                                 SETUP
+    //////////////////////////////////////////////////////////////*/
+
+    //  Setup vars
+    uint256 constant FORK_BLOCK_NUMBER = 16848000; // All tests executed at this block
+    string MAINNET_RPC_URL = "MAINNET_RPC_URL";
+    uint256 forkId = vm.createSelectFork(vm.envString(MAINNET_RPC_URL), FORK_BLOCK_NUMBER);
     DefaultTokenUriResolver d =
         new DefaultTokenUriResolver(
             operatorStore,
@@ -39,30 +47,70 @@ contract ContractTest is Test {
             projectHandles,
             capsulesTypeface
         );
-
     TokenUriResolver t = new TokenUriResolver(_projects, operatorStore, d);
 
     /*//////////////////////////////////////////////////////////////
                          TOKENURIRESOLVER TESTS
     //////////////////////////////////////////////////////////////*/
 
-    // Tests that the default resolver returns expected output
-    function testGetDefaultMetadata() public {
+    // Tests that the default resolver returns expected output for a Directory V2 project on Controller V1: basic metadata instructing the owner to upgrade the project.
+    function testGetDefaultMetadataDirectoryV2ControllerV1() public {
         // Load known output at block 16848000
-        string memory knownOutput = KNOWN_OUTPUT; // see test/KnownOutput.sol
-        // Roll to that same block
-        vm.roll(16848000);
+        string memory knownOutput = KNOWN_OUTPUT_DIRECTORY_V2_CONTROLLER_V1;
+
+        // Get uri
+        string memory output = t.getUri(5); // Project 5 is a Directory V2 project that's very unlikely to be upgraded to DirectoryV3 https://juicebox.money/v2/p/5
+        // console.log(output);
+
+        // Check that tokenUri returns something
+        assertTrue(keccak256(abi.encodePacked(output)) != keccak256(abi.encodePacked(string(""))));
+        
+        // Compare hash of known (expected) output and new output
+        assertEq(keccak256(abi.encodePacked(knownOutput)), keccak256(abi.encodePacked(output)));
+    }
+
+    // Tests that the default resolver returns expected output for a for a Directory V3, Controller 1 project
+    function testGetDefaultMetadataDirectoryV3Controller1() public {
+        // Load known output at block 16848000
+        string memory knownOutput = KNOWN_OUTPUT_DIRECTORY_V3_CONTROLLER_V1; 
+        
+        // Get uri
+        string memory output = t.getUri(313); // Project 313 is a Directory V3 Controller V1 project that's very unlikely to be upgraded to Controller 3.1 https://juicebox.money/v2/p/313
+        // console.log(output);
+       
+        // Check that tokenUri returns something
+        assertTrue(keccak256(abi.encodePacked(output)) != keccak256(abi.encodePacked(string(""))));
+        
+        // Output to file
+        // string[] memory inputs = new string[](3);
+        // inputs[0] = "node";
+        // inputs[1] = "./open.js";
+        // inputs[2] = output;
+        // vm.ffi(inputs);
+
+        // Compare hash of known (expected) output and new output
+        assertEq(keccak256(abi.encodePacked(knownOutput)), keccak256(abi.encodePacked(output)));
+    }
+
+    // Tests that the default resolver returns expected output for a for a Directory V2, Controller 3.1 project
+    function testGetDefaultMetadataDirectoryV3Controller3_1() public {
+        // Load known output at block 16848000
+        string memory knownOutput = KNOWN_OUTPUT_DIRECTORY_V3_CONTROLLER_V3_1; 
+        
         // Get uri
         string memory output = t.getUri(1);
         // console.log(output);
+
         // Check that tokenUri returns something
         assertTrue(keccak256(abi.encodePacked(output)) != keccak256(abi.encodePacked(string(""))));
-        string[] memory inputs = new string[](3);
-        inputs[0] = "node";
-        inputs[1] = "./open.js";
-        inputs[2] = output;
-        // bytes memory res = vm.ffi(inputs);
-        vm.ffi(inputs);
+        
+        // Output to file
+        // string[] memory inputs = new string[](3);
+        // inputs[0] = "node";
+        // inputs[1] = "./open.js";
+        // inputs[2] = output;
+        // vm.ffi(inputs);
+        
         // Compare hash of known (expected) output and new output
         assertEq(keccak256(abi.encodePacked(knownOutput)), keccak256(abi.encodePacked(output)));
     }
