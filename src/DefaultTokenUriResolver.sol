@@ -462,6 +462,25 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
         return (tokenStore.totalSupplyOf(_projectId) / 10 ** 18).toString();
     }
 
+    function getUpgradePromptUri(uint256 _projectId, string memory projectName) internal pure returns (string memory) {
+        return
+            string.concat(
+                string("data:application/json;base64,"),
+                Base64.encode(
+                    abi.encodePacked(
+                        '{"name":"',
+                        projectName,
+                        '", "description":"',
+                        projectName,
+                        " is a project on the Juicebox Protocol. The project owner must upgrade this project to V3 to enable this NFT's image. Visit https://juicebox.money/v2/p/",
+                        _projectId.toString(),
+                        "/settings?page=upgrades to upgrade this project.",
+                        '"}'
+                    )
+                )
+            );
+    }
+
     /**
      *  @notice Get the token uri for a project.
      *  @dev Creates metadata for the given project ID using either the default Theme colors, or custom colors if they are set.
@@ -476,6 +495,11 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
 
             // Get Project's Primary ETH Terminal
             IJBPaymentTerminal primaryEthPaymentTerminal = directory.primaryTerminalOf(_projectId, JBTokens.ETH);
+
+            // If no primary ETH terminal is set on DirectoryV3, return upgrade prompt
+            if (primaryEthPaymentTerminal == IJBPaymentTerminal(address(0))) {
+                return getUpgradePromptUri(_projectId, projectName);
+            }
 
             // Create JSON metadata and properties
             parts[0] = string(
@@ -548,7 +572,7 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
                     ';}</style><g clip-path="url(#clip0)"><path d="M289 0H0V150H289V0Z" fill="url(#paint0)"/><rect width="289" height="22" fill="#',
                     theme.textColor.toString()
                 ),
-                '"/><g id="head"><a href="https://juicebox.money/v2/p/',
+                '"/><g id="head" filter="url(#filter2)"><a href="https://juicebox.money/v2/p/',
                 _projectId.toString(),
                 '">', // Line 0: Head
                 '<text x="16" y="16">',
@@ -620,6 +644,8 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
                     _base,
                     '</text></g></g><defs><filter id="filter1" x="-3.36" y="26.04" width="298" height="150" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feMorphology operator="dilate" radius="0.1" in="SourceAlpha" result="thicken"/><feGaussianBlur in="thicken" stdDeviation="0.5" result="blurred"/><feFlood flood-color="#',
                     theme.textColor.toString(),
+                    '" result="glowColor"/><feComposite in="glowColor" in2="blurred" operator="in" result="softGlow_colored"/><feMerge><feMergeNode in="softGlow_colored"/><feMergeNode in="SourceGraphic"/></feMerge></filter><filter id="filter2" x="0" y="0" width="298" height="150" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feMorphology operator="dilate" radius="0.05" in="SourceAlpha" result="thicken"/><feGaussianBlur in="thicken" stdDeviation="0.25" result="blurred"/><feFlood flood-color="#',
+                    theme.bgColor.toString(),
                     '" result="glowColor"/><feComposite in="glowColor" in2="blurred" operator="in" result="softGlow_colored"/><feMerge><feMergeNode in="softGlow_colored"/><feMergeNode in="SourceGraphic"/></feMerge></filter><linearGradient id="paint0" x1="0" y1="202" x2="289" y2="202" gradientUnits="userSpaceOnUse"><stop stop-color="#',
                     theme.bgColorAlt.toString(),
                     '"/><stop offset="0.119792" stop-color="#'
