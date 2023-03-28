@@ -19,8 +19,7 @@ contract DeployScript is Script {
         uint256 deployerPrivateKey = vm.envUint("GOERLI_PRIVATE_KEY");
         vm.startBroadcast(deployerPrivateKey);
 
-        // Deploy DefaultTokenUriResolver
-        // StringSlicer and LibColor autodeployed by forge
+        // Deploy DefaultTokenUriResolver (StringSlicer and LibColor libs autodeployed by forge)
         DefaultTokenUriResolver defaultTokenUriResolver = new DefaultTokenUriResolver(
             operatorStore,
             directory,
@@ -28,13 +27,6 @@ contract DeployScript is Script {
             controller3_1,
             projectHandles,
             capsulesTypeface
-        );
-
-        // Deploy TokenUriResolver
-        TokenUriResolver tokenUriResolver = new TokenUriResolver(
-            projects,
-            operatorStore,
-            IJBTokenUriResolver(defaultTokenUriResolver)
         );
 
         vm.stopBroadcast();
