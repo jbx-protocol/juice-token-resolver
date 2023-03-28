@@ -116,7 +116,7 @@
   "pending": [],
   "path": "/Users/nico/Development/juicebox/juice-token-resolver/broadcast/Mainnet_Deploy_DefaultResolverOnly.s.sol/1/run-latest.json",
   "returns": {},
-  "timestamp": 1680034445,
+  "timestamp": 1680034408,
   "chain": 1,
   "multi": false,
   "commit": "085c581"

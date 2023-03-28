@@ -10,7 +10,7 @@ Creates onchain SVG Metadata for all Juicebox projects on [JBDirectory V3](https
 
 - StringSlicer.sol [eth:0xaDE1ae7bCcc2Cb84De0431a70cceB5f1DE0E2c9b](https://etherscan.io/address/0xade1ae7bccc2cb84de0431a70cceb5f1de0e2c9b)
 - LibColor [eth:0x53aD3C068B6bf487c1bFE8694C8a5b5546b43063](https://etherscan.io/address/0x53ad3c068b6bf487c1bfe8694c8a5b5546b43063)
-- DefaultUriResolver [eth:0x62BC9F7daE47676B16EE95719c4B78Bdb5e9f974](https://etherscan.io/address/0x62BC9F7daE47676B16EE95719c4B78Bdb5e9f974)
+- DefaultUriResolver [eth:0x9D63AFc505C6b2c9387ad837A1Acf23e1e4fa520](https://etherscan.io/address/0x9D63AFc505C6b2c9387ad837A1Acf23e1e4fa520)
 - TokenUriResolver [eth:0x2c39bb41e2af6bec6c3bb102c07c15eda648a366](https://etherscan.io/address/0x2c39bb41e2af6bec6c3bb102c07c15eda648a366)
 
 ### Goerli
