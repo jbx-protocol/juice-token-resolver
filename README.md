@@ -47,9 +47,13 @@ Run `forge test -v --ffi --match-test testGetDefaultMetadataDirectoryV3Controlle
 
 ## Deploying
 
-To deploy to Goerli, call `forge script script/Goerli_Deploy.s.sol`.
+Deploy all contracts to Goerli: `forge script script/Goerli_Deploy.s.sol --rpc-url $GOERLI_RPC_URL --broadcast --verify`
 
-To deploy to Mainnet, call `forge script script/Mainnet_Deploy.s.sol`. If you are deploying only an updated DefaultUriResolver, you can call `forge script script/Mainnet_Deploy_DeafultResolverOnly.s`, then call setDefaultResolver on the TokenUriResolver passing the new address as an argument.
+Deploy only the DefaultTokenUriResolver to Goerli: `forge script script/Goerli_Deploy_DeafultResolverOnly.s --rpc-url $GOERLI_RPC_URL --broadcast --verify`
+
+Deploy all contracts to Mainnet: `forge script script/Mainnet_Deploy.s.sol --rpc-url $MAINNET_RPC_URL --broadcast --verify`
+
+Deploy only the DefaultTokenUriResolver to Mainnet: `forge script script/Mainnet_Deploy_DefaultResolverOnly.s.sol --rpc-url $MAINNET_RPC_URL --broadcast --verify`
 
 ## Design
 
