@@ -19,6 +19,7 @@ import {JBFundingCycle} from "@jbx-protocol/juice-contracts-v3/contracts/structs
 import {IJBPaymentTerminal} from "@jbx-protocol/juice-contracts-v3/contracts/interfaces/IJBPaymentTerminal.sol";
 import {JBTokens} from "@jbx-protocol/juice-contracts-v3/contracts/libraries/JBTokens.sol";
 import {JBCurrencies} from "@jbx-protocol/juice-contracts-v3/contracts/libraries/JBCurrencies.sol";
+import {IJBController} from "@jbx-protocol/juice-contracts-v3/contracts/interfaces/IJBController.sol";
 import {IJBController3_1, IJBDirectory, IJBFundingCycleStore} from "@jbx-protocol/juice-contracts-v3/contracts/interfaces/IJBController3_1.sol";
 import {IJBOperatorStore} from "@jbx-protocol/juice-contracts-v3/contracts/interfaces/IJBOperatorStore.sol";
 import {IJBPayoutRedemptionPaymentTerminal} from "@jbx-protocol/juice-contracts-v3/contracts/interfaces/IJBPayoutRedemptionPaymentTerminal.sol";
@@ -34,40 +35,30 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
     using Strings for uint256;
     using LibColor for Color;
 
-    /**
-     * @notice Emitted when a theme is set. Emitted when setting default and custom themes.
-     */
+    /// @notice Emitted when a theme is set. Emitted when setting default and custom themes.
     event ThemeSet(uint256 projectId, Color textColor, Color bgColor, Color bgColorAlt);
 
-    /**
-     * @notice Emitted when a project's custom theme is reset to the default.
-     */
+    /// @notice Emitted when a project's custom theme is reset to the default.
     event ThemeReset(uint256 projectId);
 
-    /**
-     * @notice The address of the Juicebox Funding Cycle Store contract.
-     */
+    /// @notice The address of the Juicebox Funding Cycle Store contract.
     IJBFundingCycleStore public immutable fundingCycleStore;
 
-    /**
-     * @notice The address of the Juicebox Projects contract.
-     */
+    /// @notice The address of the Juicebox Projects contract.
     IJBProjects public immutable projects;
 
-    /**
-     * @notice The address of the Juicebox Directory contract.
-     */
+    /// @notice The address of the Juicebox Directory contract.
     IJBDirectory public immutable directory;
 
-    /**
-     * @notice The address of the Juicebox Project Handles contract.
-     */
+    /// @notice The address of the Juicebox Project Handles contract.
     IJBProjectHandles public immutable projectHandles;
 
-    /**
-     * @notice The address of the Capsules typeface contract.
-     */
+    /// @notice The address of the Capsules typeface contract.
     ITypeface public immutable capsulesTypeface;
+
+    /// @notice The address of the Juicebox Controller contract.
+    IJBController public immutable controller;
+    IJBController3_1 public immutable controller3_1;
 
     /**
      * @notice Mapping containing each project's theme, if one is set. Themes describe the color palette to be used when generating the token uri SVG.
@@ -78,11 +69,15 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
     constructor(
         IJBOperatorStore _operatorStore,
         IJBDirectory _directory,
+        IJBController _controller,
+        IJBController3_1 _controller3_1,
         IJBProjectHandles _projectHandles,
         ITypeface _capsulesTypeface
     ) JBOperatable(_operatorStore) {
         directory = _directory;
         projects = directory.projects();
+        controller = _controller;
+        controller3_1 = _controller3_1;
         fundingCycleStore = directory.fundingCycleStore();
         projectHandles = _projectHandles;
         capsulesTypeface = _capsulesTypeface;
@@ -272,12 +267,34 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
         uint256 _projectId
     ) internal view returns (string memory payouts) {
         uint256 latestConfiguration = fundingCycleStore.latestConfigurationOf(_projectId); // Get project's current cycle configuration
-        IJBController3_1 controller = IJBController3_1(directory.controllerOf(_projectId));
-        IJBFundAccessConstraintsStore fundAccessConstraintStore = IJBFundAccessConstraintsStore(
-            controller.fundAccessConstraintsStore()
-        );
-        (uint256 payoutsPreprocessed, uint256 payoutsCurrencyPreprocessed) = fundAccessConstraintStore
-            .distributionLimitOf(_projectId, latestConfiguration, primaryEthPaymentTerminal, JBTokens.ETH); // Get raw payouts data
+        address controllerAddress = directory.controllerOf(_projectId); // Get project's controller address
+        uint256 payoutsPreprocessed;
+        uint256 payoutsCurrencyPreprocessed;
+        if (controllerAddress == address(controller3_1)) {
+            // If the project is using Controller v3.1
+            IJBFundAccessConstraintsStore fundAccessConstraintStore = IJBFundAccessConstraintsStore(
+                controller3_1.fundAccessConstraintsStore()
+            );
+            (payoutsPreprocessed, payoutsCurrencyPreprocessed) = fundAccessConstraintStore.distributionLimitOf(
+                _projectId,
+                latestConfiguration,
+                primaryEthPaymentTerminal,
+                JBTokens.ETH
+            ); // Get raw payouts data
+        }
+        if (controllerAddress == address(controller)) {
+            // If the project is using the original Controller
+            (payoutsPreprocessed, payoutsCurrencyPreprocessed) = controller.distributionLimitOf(
+                _projectId,
+                latestConfiguration,
+                primaryEthPaymentTerminal,
+                JBTokens.ETH
+            ); // Project's payouts and currency
+        }
+        if (payoutsPreprocessed == type(uint232).max) {
+            // If are set to unlimited
+            return unicode"∞"; // Return Payouts = infinity
+        }
         string memory payoutsCurrency;
         payoutsCurrencyPreprocessed == 1 ? payoutsCurrency = unicode"Ξ" : payoutsCurrency = "$"; // Translate payouts currency into appropriate string
         return (string.concat(payoutsCurrency, (payoutsPreprocessed / 10 ** 18).toString())); // Return string containing currency and payouts limit
@@ -292,12 +309,34 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
     ) internal view returns (string memory payoutsRow) {
         uint256 latestConfiguration = fundingCycleStore.latestConfigurationOf(_projectId); // Get project's current cycle configuration
         string memory payoutsCurrency;
-        IJBController3_1 controller = IJBController3_1(directory.controllerOf(_projectId));
-        IJBFundAccessConstraintsStore fundAccessConstraintStore = IJBFundAccessConstraintsStore(
-            controller.fundAccessConstraintsStore()
-        );
-        (uint256 payoutsPreprocessed, uint256 payoutsCurrencyPreprocessed) = fundAccessConstraintStore
-            .distributionLimitOf(_projectId, latestConfiguration, primaryEthPaymentTerminal, JBTokens.ETH); // Project's payouts and currency
+        address controllerAddress = directory.controllerOf(_projectId); // Get project's controller address
+        uint256 payoutsPreprocessed;
+        uint256 payoutsCurrencyPreprocessed;
+        // If the project is using Controller v3.1
+        if (controllerAddress == address(controller3_1)) {
+            IJBFundAccessConstraintsStore fundAccessConstraintStore = IJBFundAccessConstraintsStore(
+                controller3_1.fundAccessConstraintsStore()
+            );
+            (payoutsPreprocessed, payoutsCurrencyPreprocessed) = fundAccessConstraintStore.distributionLimitOf(
+                _projectId,
+                latestConfiguration,
+                primaryEthPaymentTerminal,
+                JBTokens.ETH
+            ); // Get raw payouts data
+        }
+        // If the project is using the original Controller
+        if (controllerAddress == address(controller)) {
+            (payoutsPreprocessed, payoutsCurrencyPreprocessed) = controller.distributionLimitOf(
+                _projectId,
+                latestConfiguration,
+                primaryEthPaymentTerminal,
+                JBTokens.ETH
+            ); // Project's payouts and currency
+        }
+        if (payoutsPreprocessed == type(uint232).max) {
+            // If are set to unlimited
+            return string.concat(pad(false, unicode"  ᴘᴀʏouᴛs", 22), pad(true, string.concat(unicode"∞"), 15)); // Return Payouts = infinity
+        }
         if (payoutsCurrencyPreprocessed == 1) {
             payoutsCurrency = unicode"Ξ";
         } else {
@@ -310,11 +349,26 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
     }
 
     /**
+     * @notice Returns the token store.
+     */
+    function getTokenStore(uint256 _projectId) internal view returns (IJBTokenStore) {
+        address _controller = directory.controllerOf(_projectId);
+        if (_controller == address(controller)) {
+            IJBController c = IJBController(_controller);
+            return c.tokenStore();
+        }
+        if (_controller == address(controller3_1)) {
+            IJBController3_1 c = IJBController3_1(_controller);
+            return c.tokenStore();
+        }
+        revert("getTokenStore: UNRECOGNIZED_CONTROLLER");
+    }
+
+    /**
      * @notice Returns the token supply row string.
      */
     function getTokenSupplyRow(uint256 _projectId) internal view returns (string memory tokenSupplyRow) {
-        IJBController3_1 controller = IJBController3_1(directory.controllerOf(_projectId));
-        IJBTokenStore tokenStore = controller.tokenStore();
+        IJBTokenStore tokenStore = getTokenStore(_projectId);
         uint256 totalSupply = tokenStore.totalSupplyOf(_projectId) / 10 ** 18; // Project's fungible token total supply
         string memory paddedTokenSupplyLeft = string.concat(pad(true, totalSupply.toString(), 13), "  "); // Project's token token supply as a string
         string memory paddedTokenSupplyRight = pad(false, unicode"  ᴛoᴋᴇɴ suᴘᴘʟʏ", 28);
@@ -404,9 +458,27 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
      * @notice Returns a string containing the project's ETH balance.
      */
     function getTokenSupply(uint256 _projectId) internal view returns (string memory) {
-        IJBController3_1 controller = IJBController3_1(directory.controllerOf(_projectId));
-        IJBTokenStore tokenStore = controller.tokenStore();
+        IJBTokenStore tokenStore = getTokenStore(_projectId);
         return (tokenStore.totalSupplyOf(_projectId) / 10 ** 18).toString();
+    }
+
+    function getUpgradePromptUri(uint256 _projectId, string memory projectName) internal pure returns (string memory) {
+        return
+            string.concat(
+                string("data:application/json;base64,"),
+                Base64.encode(
+                    abi.encodePacked(
+                        '{"name":"',
+                        projectName,
+                        '", "description":"',
+                        projectName,
+                        " is a project on the Juicebox Protocol. The project owner must upgrade this project to V3 to enable this NFT's image. Visit https://juicebox.money/v2/p/",
+                        _projectId.toString(),
+                        "/settings?page=upgrades to upgrade this project.",
+                        '"}'
+                    )
+                )
+            );
     }
 
     /**
@@ -423,6 +495,11 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
 
             // Get Project's Primary ETH Terminal
             IJBPaymentTerminal primaryEthPaymentTerminal = directory.primaryTerminalOf(_projectId, JBTokens.ETH);
+
+            // If no primary ETH terminal is set on DirectoryV3, return upgrade prompt
+            if (primaryEthPaymentTerminal == IJBPaymentTerminal(address(0))) {
+                return getUpgradePromptUri(_projectId, projectName);
+            }
 
             // Create JSON metadata and properties
             parts[0] = string(
@@ -486,16 +563,16 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
         return
             abi.encodePacked(
                 abi.encodePacked(
-                    '<svg width="289" height="160" viewBox="0 0 289 160" xmlns="http://www.w3.org/2000/svg"><style>@font-face{font-family:"Capsules-500";src:url(data:font/truetype;charset=utf-8;base64,',
+                    '<svg width="289" height="150" viewBox="0 0 289 150" xmlns="http://www.w3.org/2000/svg"><style>@font-face{font-family:"Capsules-500";src:url(data:font/truetype;charset=utf-8;base64,',
                     getFontSource(), // get Capsules typeface
                     ');format("opentype");}a,a:visited,a:hover{fill:inherit;text-decoration:none;}text{font-size:16px;fill:#',
                     theme.textColor.toString(),
                     ';font-family:"Capsules-500",monospace;font-weight:500;white-space:pre;}#head text{fill:#',
                     theme.bgColor.toString(),
-                    ';}</style><g clip-path="url(#clip0)"><path d="M289 0H0V160H289V0Z" fill="url(#paint0)"/><rect width="289" height="22" fill="#',
+                    ';}</style><g clip-path="url(#clip0)"><path d="M289 0H0V150H289V0Z" fill="url(#paint0)"/><rect width="289" height="22" fill="#',
                     theme.textColor.toString()
                 ),
-                '"/><g id="head"><a href="https://juicebox.money/v2/p/',
+                '"/><g id="head" filter="url(#filter2)"><a href="https://juicebox.money/v2/p/',
                 _projectId.toString(),
                 '">', // Line 0: Head
                 '<text x="16" y="16">',
@@ -565,8 +642,10 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
             abi.encodePacked(
                 abi.encodePacked(
                     _base,
-                    '</text></g></g><defs><filter id="filter1" x="-3.36" y="26.04" width="298" height="160" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feMorphology operator="dilate" radius="0.1" in="SourceAlpha" result="thicken"/><feGaussianBlur in="thicken" stdDeviation="0.5" result="blurred"/><feFlood flood-color="#',
+                    '</text></g></g><defs><filter id="filter1" x="-3.36" y="26.04" width="298" height="150" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feMorphology operator="dilate" radius="0.1" in="SourceAlpha" result="thicken"/><feGaussianBlur in="thicken" stdDeviation="0.5" result="blurred"/><feFlood flood-color="#',
                     theme.textColor.toString(),
+                    '" result="glowColor"/><feComposite in="glowColor" in2="blurred" operator="in" result="softGlow_colored"/><feMerge><feMergeNode in="softGlow_colored"/><feMergeNode in="SourceGraphic"/></feMerge></filter><filter id="filter2" x="0" y="0" width="298" height="150" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feMorphology operator="dilate" radius="0.05" in="SourceAlpha" result="thicken"/><feGaussianBlur in="thicken" stdDeviation="0.25" result="blurred"/><feFlood flood-color="#',
+                    theme.bgColor.toString(),
                     '" result="glowColor"/><feComposite in="glowColor" in2="blurred" operator="in" result="softGlow_colored"/><feMerge><feMergeNode in="softGlow_colored"/><feMergeNode in="SourceGraphic"/></feMerge></filter><linearGradient id="paint0" x1="0" y1="202" x2="289" y2="202" gradientUnits="userSpaceOnUse"><stop stop-color="#',
                     theme.bgColorAlt.toString(),
                     '"/><stop offset="0.119792" stop-color="#'
@@ -576,7 +655,7 @@ contract DefaultTokenUriResolver is IJBTokenUriResolver, JBOperatable, Ownable {
                 theme.bgColor.toString(),
                 '"/><stop offset="1" stop-color="#',
                 theme.bgColorAlt.toString(),
-                '"/></linearGradient><clipPath id="clip0"><rect width="289" height="160" /></clipPath></defs></svg>'
+                '"/></linearGradient><clipPath id="clip0"><rect width="289" height="150" /></clipPath></defs></svg>'
             );
     }
 

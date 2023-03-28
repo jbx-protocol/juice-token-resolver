@@ -3,8 +3,9 @@ pragma solidity ^0.8.0;
 
 import "forge-std/Test.sol";
 import {TokenUriResolver, IJBProjects} from "../src/TokenUriResolver.sol";
-import {DefaultTokenUriResolver, Theme, LibColor, Color, newColorFromRGBString, IJBOperatorStore, IJBDirectory, IJBProjectHandles, ITypeface, IJBTokenUriResolver, JBOperatable, JBUriOperations} from "../src/DefaultTokenUriResolver.sol";
+import {DefaultTokenUriResolver, Theme, LibColor, Color, newColorFromRGBString, IJBOperatorStore, IJBDirectory, IJBProjectHandles, ITypeface, IJBTokenUriResolver, JBOperatable, JBUriOperations, IJBController, IJBController3_1} from "../src/DefaultTokenUriResolver.sol";
 import {JBOperatorData} from "@jbx-protocol/juice-contracts-v3/contracts/structs/JBOperatorData.sol";
+import {KNOWN_OUTPUT_DIRECTORY_V2_CONTROLLER_V1, KNOWN_OUTPUT_DIRECTORY_V3_CONTROLLER_V1, KNOWN_OUTPUT_DIRECTORY_V3_CONTROLLER_V3_1} from "./KnownOutput.sol";
 
 // Helper contract for tests
 contract RevertingResolver is IJBTokenUriResolver {
@@ -18,33 +19,100 @@ contract RevertingResolver is IJBTokenUriResolver {
 contract ContractTest is Test {
     using LibColor for Color;
 
-    // DefaultTokenUriResolver constructor args
+    // DefaultTokenUriResolver mainnet constructor args
     IJBOperatorStore public operatorStore = IJBOperatorStore(0x6F3C5afCa0c9eDf3926eF2dDF17c8ae6391afEfb);
     IJBDirectory public directory = IJBDirectory(0x65572FB928b46f9aDB7cfe5A4c41226F636161ea);
+    IJBController public controller = IJBController(0xFFdD70C318915879d5192e8a0dcbFcB0285b3C98);
+    IJBController3_1 public controller3_1 = IJBController3_1(0x97a5b9D9F0F7cD676B69f584F29048D0Ef4BB59b);
     IJBProjectHandles public projectHandles = IJBProjectHandles(0xE3c01E9Fd2a1dCC6edF0b1058B5757138EF9FfB6);
     ITypeface public capsulesTypeface = ITypeface(0xA77b7D93E79f1E6B4f77FaB29d9ef85733A3D44A);
 
-    // Additional TokenUriResolver constructor args
+    // Additional TokenUriResolver mainnet constructor args
     IJBProjects public _projects = IJBProjects(0xD8B4359143eda5B2d763E127Ed27c77addBc47d3);
 
-    DefaultTokenUriResolver d = new DefaultTokenUriResolver(operatorStore, directory, projectHandles, capsulesTypeface);
+    /*//////////////////////////////////////////////////////////////
+                                 SETUP
+    //////////////////////////////////////////////////////////////*/
 
+    //  Setup vars
+    uint256 constant FORK_BLOCK_NUMBER = 16848000; // All tests executed at this block
+    string MAINNET_RPC_URL = "MAINNET_RPC_URL";
+    uint256 forkId = vm.createSelectFork(vm.envString(MAINNET_RPC_URL), FORK_BLOCK_NUMBER);
+    DefaultTokenUriResolver d =
+        new DefaultTokenUriResolver(
+            operatorStore,
+            directory,
+            controller,
+            controller3_1,
+            projectHandles,
+            capsulesTypeface
+        );
     TokenUriResolver t = new TokenUriResolver(_projects, operatorStore, d);
 
     /*//////////////////////////////////////////////////////////////
                          TOKENURIRESOLVER TESTS
     //////////////////////////////////////////////////////////////*/
 
-    // Tests that the default resolver works correctly
-    function testGetDefaultMetadata() public {
-        string memory x = t.getUri(1);
-        assertTrue(keccak256(abi.encodePacked(x)) != keccak256(abi.encodePacked(string("")))); // Todo Weak test.
-        string[] memory inputs = new string[](3);
-        inputs[0] = "node";
-        inputs[1] = "./open.js";
-        inputs[2] = x;
-        // bytes memory res = vm.ffi(inputs);
-        vm.ffi(inputs);
+    // Tests that the default resolver returns expected output for a Directory V2 project on Controller V1: basic metadata instructing the owner to upgrade the project.
+    function testGetDefaultMetadataDirectoryV2ControllerV1() public {
+        // Load known output at block 16848000
+        string memory knownOutput = KNOWN_OUTPUT_DIRECTORY_V2_CONTROLLER_V1;
+
+        // Get uri
+        string memory output = t.getUri(5); // Project 5 is a Directory V2 project that's very unlikely to be upgraded to DirectoryV3 https://juicebox.money/v2/p/5
+        // console.log(output);
+
+        // Check that tokenUri returns something
+        assertTrue(keccak256(abi.encodePacked(output)) != keccak256(abi.encodePacked(string(""))));
+        
+        // Compare hash of known (expected) output and new output
+        assertEq(keccak256(abi.encodePacked(knownOutput)), keccak256(abi.encodePacked(output)));
+    }
+
+    // Tests that the default resolver returns expected output for a for a Directory V3, Controller 1 project
+    function testGetDefaultMetadataDirectoryV3Controller1() public {
+        // Load known output at block 16848000
+        string memory knownOutput = KNOWN_OUTPUT_DIRECTORY_V3_CONTROLLER_V1; 
+        
+        // Get uri
+        string memory output = t.getUri(313); // Project 313 is a Directory V3 Controller V1 project that's very unlikely to be upgraded to Controller 3.1 https://juicebox.money/v2/p/313
+        // console.log(output);
+       
+        // Check that tokenUri returns something
+        assertTrue(keccak256(abi.encodePacked(output)) != keccak256(abi.encodePacked(string(""))));
+        
+        // Output to file
+        // string[] memory inputs = new string[](3);
+        // inputs[0] = "node";
+        // inputs[1] = "./open.js";
+        // inputs[2] = output;
+        // vm.ffi(inputs);
+
+        // Compare hash of known (expected) output and new output
+        assertEq(keccak256(abi.encodePacked(knownOutput)), keccak256(abi.encodePacked(output)));
+    }
+
+    // Tests that the default resolver returns expected output for a for a Directory V2, Controller 3.1 project
+    function testGetDefaultMetadataDirectoryV3Controller3_1() public {
+        // Load known output at block 16848000
+        string memory knownOutput = KNOWN_OUTPUT_DIRECTORY_V3_CONTROLLER_V3_1; 
+        
+        // Get uri
+        string memory output = t.getUri(1);
+        // console.log(output);
+
+        // Check that tokenUri returns something
+        assertTrue(keccak256(abi.encodePacked(output)) != keccak256(abi.encodePacked(string(""))));
+        
+        // Output to file
+        // string[] memory inputs = new string[](3);
+        // inputs[0] = "node";
+        // inputs[1] = "./open.js";
+        // inputs[2] = output;
+        // vm.ffi(inputs);
+        
+        // Compare hash of known (expected) output and new output
+        assertEq(keccak256(abi.encodePacked(knownOutput)), keccak256(abi.encodePacked(output)));
     }
 
     // Tests that setting a new default resolver works
@@ -59,6 +127,8 @@ contract ContractTest is Test {
         DefaultTokenUriResolver n = new DefaultTokenUriResolver(
             operatorStore,
             directory,
+            controller,
+            controller3_1,
             projectHandles,
             capsulesTypeface
         );
@@ -84,6 +154,8 @@ contract ContractTest is Test {
         DefaultTokenUriResolver y = new DefaultTokenUriResolver(
             operatorStore,
             directory,
+            controller,
+            controller3_1,
             projectHandles,
             capsulesTypeface
         );

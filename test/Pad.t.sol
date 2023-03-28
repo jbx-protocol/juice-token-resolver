@@ -40,12 +40,12 @@ contract ContractTest is Test {
         string memory str = "testing a string that's longer than the target";
         // Left
         string memory res = pad(true, str, 10);
-        console.log(res);
+        // console.log(res);
         assertEq(bytes(res).length, 12);
         assertEq(keccak256(abi.encodePacked(res)), keccak256(abi.encodePacked(unicode"testing a…")));
         // Right
         res = pad(false, str, 10);
-        console.log(res);
+        // console.log(res);
         assertEq(bytes(res).length, 12);
         assertEq(keccak256(abi.encodePacked(res)), keccak256(abi.encodePacked(unicode"testing a…")));
     }
@@ -55,12 +55,12 @@ contract ContractTest is Test {
         string memory str = unicode" testing a string that's longer than the target";
         // Left
         string memory res = pad(true, str, 10);
-        console.log(res);
+        // console.log(res);
         assertEq(bytes(res).length, 12);
         assertEq(keccak256(abi.encodePacked(res)), keccak256(abi.encodePacked(unicode" testi…")));
         // Right
         res = pad(false, str, 10);
-        console.log(res);
+        // console.log(res);
         assertEq(bytes(res).length, 12);
         assertEq(keccak256(abi.encodePacked(res)), keccak256(abi.encodePacked(unicode" testi…")));
     }
