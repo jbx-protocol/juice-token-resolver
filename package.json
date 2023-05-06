@@ -1,4 +1,9 @@
 {
+  "name": "@jbx-protocol/juice-token-resolver",
+  "bugs": {
+    "url": "https://github.com/jbx-protocol/juice-token-resolver/issues"
+  },
+  "version": "1.0.0",
   "license": "MIT",
   "dependencies": {
     "@ensdomains/ens-contracts": "^0.0.20",
